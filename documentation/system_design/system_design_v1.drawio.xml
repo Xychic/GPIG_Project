@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mxfile host="app.diagrams.net" modified="2023-10-17T12:21:39.282Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0" etag="bIUiYSwyv5ELBLzhAdTT" version="22.0.4">
+<mxfile host="app.diagrams.net" modified="2023-10-17T12:30:10.638Z" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/111.0" etag="_AFf3hWHC4f5OYxnb88G" version="22.0.4">
   <diagram name="Page-1" id="0F1jTdF71DDpJjTvnIFM">
-    <mxGraphModel dx="1658" dy="889" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="1658" dy="839" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -92,7 +92,7 @@
         <mxCell id="dDjBjUWeL5qX8fLdfKKD-26" value="" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;dashPattern=8 8;fillColor=none;" vertex="1" parent="1">
           <mxGeometry x="40" y="680" width="680" height="320" as="geometry" />
         </mxCell>
-        <mxCell id="dDjBjUWeL5qX8fLdfKKD-27" value="Remove System (cloud?)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+        <mxCell id="dDjBjUWeL5qX8fLdfKKD-27" value="Remote System (cloud?)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
           <mxGeometry x="30" y="660" width="170" height="30" as="geometry" />
         </mxCell>
         <mxCell id="dDjBjUWeL5qX8fLdfKKD-37" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="dDjBjUWeL5qX8fLdfKKD-32" target="dDjBjUWeL5qX8fLdfKKD-35">
@@ -139,6 +139,9 @@
         </mxCell>
         <mxCell id="dDjBjUWeL5qX8fLdfKKD-50" value="Python WebApp" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="320" y="920" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="dDjBjUWeL5qX8fLdfKKD-52" value="rkd" style="text;strokeColor=none;align=center;fillColor=none;html=1;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+          <mxGeometry x="490" y="510" width="60" height="30" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>
