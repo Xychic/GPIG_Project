@@ -44,6 +44,20 @@ class Graph:
             raise ValueError(f"Graph already contains node: {n}")
         self.nodes[n.id] = n
 
+    def remove_node(self, n: Node):
+        if n.id not in self.nodes:
+            raise ValueError(f"Graph doesn't contain node: {n}")
+
+        connections = self.weights[n.id]
+
+        while len(connections):
+            edge = connections[0]
+            self.weights[edge.node_a.id].remove(edge)
+            self.weights[edge.node_b.id].remove(edge)
+        del(self.weights[n.id])
+        del(self.nodes[n.id])
+
+
     def add_connection(self, a: Node, b: Node, weight: float):
         if a.id not in self.nodes:
             raise ValueError(f"Node not in graph: {a}")
