@@ -1,70 +1,91 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from collections import defaultdict
 
 
-
-@dataclass 
-class Node_edge:
-    """
-    An "Edge" in graph terms between two nodes
-    
-
-    Raises:
-        ValueError: If a negative weight is give
-    """
-    node_a:Node
-    node_b:Node
-    weight:float
-
-
-    def __post_init__(self):
-        if not 0 <= self.weight:
-            raise ValueError(f"Invalid weight: {self.weight}")
 @dataclass
 class Node:
     id: int
     lat: float
     lon: float
-    connected_nodes: list["Node_edge"] = None
 
     def __post_init__(self):
         if not -90 <= self.lat <= 90:
             raise ValueError(f"Invalid latitude {self.lat}")
         if not -180 <= self.lon <= 180:
             raise ValueError(f"Invalid longitude {self.lon}")
-    def add_connection(self,node_to_connect ,weight):
-        
-        """
-        Add connection with a node_edge between two nodes.
-        This function creates one edge that links both nodes.
-        For one edge between nodes this function only needs to be called on one of those nodes.
-        """
-        #check that the connection does not already exist
-        if self.connected_to_node(node_to_connect):
-            return
-        #create edge/connection
-        edge = Node_edge(self,node_to_connect,weight)
-        #append to list of connections
-        self.connected_nodes.append(edge)
-        #add the edge in the other node so both nodes are connected
-        node_to_connect.__add_node(edge)
 
-    def __add_node(self,edge):
-        """
-        Private function to add an edge 
-        is called in the add_connection function 
-        
-        """
-        if edge in self.connected_nodes:
-            raise ValueError(f"Edge already exists {edge}")
-        self.connected_nodes.append(edge)
+@dataclass 
+class NodeEdge:
+    """
+    An "Edge" in graph terms between two nodes
+
+    Raises:
+        ValueError: If a negative weight is give
+    """
+    node_a: Node
+    node_b: Node
+    weight: float
 
 
-    def connected_to_node(self,node)->bool:
-        """Returns true if this node is connected"""
-        for edge in self.connected_nodes:
-            if edge.connected_node ==node:
-                return True
-        return False
+    def __post_init__(self):
+        if not 0 <= self.weight:
+            raise ValueError(f"Invalid weight: {self.weight}")
+
+@dataclass
+class Graph:
+    """
+    """
+
+    nodes: dict[int, Node] = field(default_factory=dict)
+    weights: defaultdict[int, list[NodeEdge]] = field(default_factory=lambda: defaultdict(list))
+
+    def add_node(self, n: Node):
+        if n.id in self.nodes:
+            raise ValueError(f"Graph already contains node: {n}")
+        self.nodes[n.id] = n
+
+    def add_connection(self, a: Node, b: Node, weight: float):
+        if a.id not in self.nodes:
+            raise ValueError(f"Node not in graph: {a}")
+        if b.id not in self.nodes:
+            raise ValueError(f"Node not in graph: {b}")
+        if a.id == b.id:
+            raise ValueError(f"Node cannot connect to itself")
+        if self.get_connection(a, b) is not None:
+            raise ValueError(f"Connection already exists")
+
+        edge = NodeEdge(a, b, weight)
+        self.weights[a.id].append(edge)
+        self.weights[b.id].append(edge)
+
+    def get_connection(self, a: Node, b: Node) -> NodeEdge | None:
+        if a.id not in self.nodes:
+            raise ValueError(f"Node not in graph: {a}")
+        if b.id not in self.nodes:
+            raise ValueError(f"Node not in graph: {b}")
+
+        a_connections = self.weights[a.id]
+        b_connections = self.weights[b.id]
+        if len(a_connections) < len(b_connections):
+            connections = a_connections
+        else:
+            connections = b_connections
+
+        for connection in connections:
+            if (connection.node_a.id == a.id and connection.node_b.id == b.id) or \
+                connection.node_a.id == b.id and connection.node_b.id == a.id:
+                return connection
+        return None
+
+    def remove_connection(self, a: Node, b: Node):
+        connection = self.get_connection(a, b)
+        if connection is None:
+            raise ValueError(f"No connection between nodes: {a}, {b}")
+
+        self.weights[a.id].remove(connection)
+        self.weights[b.id].remove(connection)
+
+
 
 @dataclass
 class Species:
