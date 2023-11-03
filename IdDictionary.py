@@ -1,7 +1,8 @@
 import random
 import string
+
 class IdGenerator:
-    def __init__(self,length =2,alphabet=string.ascii_letters):
+    def __init__(self,length =2,alphabet=string.ascii_uppercase):
         self.length = length
         self.alphabet = alphabet
         self.inUse = set()
@@ -9,7 +10,17 @@ class IdGenerator:
         new_id = ''.join(random.choice(self.alphabet) for i in range(self.length))
         while new_id in self.inUse:
              new_id = ''.join(random.choice(self.alphabet) for i in range(self.length))
+        self.inUse.add(new_id)
         return new_id
+    def remove_id(self,id):
+        self.inUse.remove(id)
+
+    def __len__(self):
+        return len(self.inUse)
+    def get_used_ids(self):
+        return list(self.inUse)
+
+
 
 
 class IdDict:
