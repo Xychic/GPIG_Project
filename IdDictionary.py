@@ -1,3 +1,17 @@
+import random
+import string
+class IdGenerator:
+    def __init__(self,length =2,alphabet=string.ascii_letters):
+        self.length = length
+        self.alphabet = alphabet
+        self.inUse = set()
+    def gen_id(self):
+        new_id = ''.join(random.choice(self.alphabet) for i in range(self.length))
+        while new_id in self.inUse:
+             new_id = ''.join(random.choice(self.alphabet) for i in range(self.length))
+        return new_id
+
+
 class IdDict:
     """
     A dictionary that gives each object added a  unique integer ID
