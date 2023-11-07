@@ -16,7 +16,7 @@ class IdGenerator:
         self.inUse.add(new_id)
         return new_id
 
-    def remove_id(self, id):
+    def remove_id(self, id: str):
         self.inUse.remove(id)
 
     def __len__(self):
@@ -55,9 +55,11 @@ class IdDict(Generic[T]):
 
     def get_id(self, object: T) -> str:
         result = next(
-            k
-            for (k, v) in self._data.items()
-            if v == object
+            (
+                k
+                for (k, v) in self._data.items()
+                if v == object
+            ), None
         )
         if result is None:
             raise Exception(f"Invalid object: {object}")

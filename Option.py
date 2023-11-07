@@ -8,7 +8,10 @@ class Some(Generic[T]):
     _value: T
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, Some) and self._value == other._value
+        if isinstance(other, Some):
+            x: Some[T] = other
+            return self._value == x._value
+        return False
 
     def __ne__(self, other: Any) -> bool:
         return self != other
