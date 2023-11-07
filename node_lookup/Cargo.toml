@@ -1,0 +1,16 @@
+[package]
+name = "node_lookup"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "node_lookup"
+crate-type = ["dylib"]
+
+[dependencies.cpython]
+features = ["extension-module"]
+version = "0.7.0"
+
+[lib.cpython]
+features = ["extension-module"]
+version = "0.7.0"
