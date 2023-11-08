@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Callable
 from uuid import uuid4
 from Option import Null, Option, Some
-
+import math
 @dataclass
 class NodeEdge:
     """
@@ -40,6 +40,26 @@ class Node:
     def __repr__(self) -> str:
         return f"Node({self.id}@({self.lat},{self.lon}))"
 
+def distanceBetweenNodes(nodeA:Node,nodeB:Node)-> float:
+    """Returns the distance in M between 
+    two nodes calculated from their latitudes
+    and longitudes using the haversine formula"""
+    result:float
+    #Convert to radians
+    Alat:float = math.radians(nodeA.lat)
+    Alon:float = math.radians(nodeA.lon)
+    Blat:float = math.radians(nodeB.lat)
+    Blon:float = math.radians(nodeB.lon)
+    latitudeDelta:float = Alat - Blat
+    longitudeDelta:float = Alon - Blon
+    a:float = math.sin(latitudeDelta/2)**2 + math.cos(Alat)*math.cos(Blat) * math.sin(longitudeDelta/2)**2
+    c:float = 2* math.asin(math.sqrt(a))
+    EarthRadius:float = 6371000
+    result:float = EarthRadius * EarthRadius
+    return result
+
+
+
 @dataclass
 class Species:
     name: str
@@ -48,6 +68,7 @@ class Species:
 @dataclass
 class Plants:
     species: Species
+
 
 
 class Map:
