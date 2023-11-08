@@ -19,7 +19,7 @@ class SensorData:
     soil_temperature_level:float
     soil_humidity_level:float
     soil_ph:float
-
+    anomalous:bool =False
 
     def __post_init__(self):
         """Run data sanitation checks for individual fields"""
