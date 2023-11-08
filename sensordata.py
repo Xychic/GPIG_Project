@@ -6,6 +6,7 @@ class SensorData:
 
     #TODO 
     #Decide on date format
+    id:int
     date:float
 
     co2_level:float
