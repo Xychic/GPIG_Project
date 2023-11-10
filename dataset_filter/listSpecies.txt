@@ -1,0 +1,117 @@
+Acer campestre L.
+Acer monspessulanum L.
+Acer negundo L.
+Acer opalus Mill.
+Acer palmatum Thunb.
+Acer platanoides L.
+Acer pseudoplatanus L.
+Acer saccharinum L.
+Aesculus hippocastanum L.
+Alnus cordata (Loisel.) Duby
+Alnus glutinosa (L.) Gaertn.
+Arbutus unedo L.
+Betula pendula Roth
+Betula pubescens Ehrh.
+Betula utilis D.Don
+Carpinus betulus L.
+Castanea sativa Mill.
+Cedrus atlantica (Manetti ex Endl.) Carrière
+Celtis australis L.
+Cornus mas L.
+Cornus sanguinea L.
+Corylus avellana L.
+Crataegus azarolus L.
+Crataegus germanica (L.) Kuntze
+Crataegus laevigata (Poir.) DC.
+Crataegus monogyna Jacq.
+Diospyros kaki L.f.
+Elaeagnus angustifolia L.
+Fagus sylvatica L.
+Ficus carica L.
+Fraxinus angustifolia Vahl
+Fraxinus excelsior L.
+Fraxinus ornus L.
+Ginkgo biloba L.
+Gleditsia triacanthos L.
+Ilex aquifolium L.
+Juglans nigra L.
+Juglans regia L.
+Juniperus oxycedrus L.
+Juniperus phoenicea L.
+Koelreuteria paniculata Laxm.
+Laburnum anagyroides Medik.
+Larix decidua Mill.
+Laurus nobilis L.
+Liquidambar styraciflua L.
+Liriodendron tulipifera L.
+Magnolia grandiflora L.
+Malus pumila Mill.
+Malus sylvestris Mill.
+Melia azedarach L.
+Morus alba L.
+Myrtus communis L.
+Olea europaea L.
+Pinus cembra L.
+Pinus halepensis Mill.
+Pinus mugo Turra
+Pinus nigra Arnold
+Pinus pinaster Aiton
+Pinus pinea L.
+Pinus sylvestris L.
+Pistacia lentiscus L.
+Pistacia terebinthus L.
+Platanus orientalis L.
+Platanus x hispanica Mill. ex Münchh.
+Populus alba L.
+Populus nigra L.
+Populus tremula L.
+Populus trichocarpa Torr. & A.Gray ex Hook.
+Prunus armeniaca L.
+Prunus avium (L.) L.
+Prunus cerasifera Ehrh.
+Prunus dulcis (Mill.) D.A.Webb
+Prunus laurocerasus L.
+Prunus mahaleb L.
+Prunus padus L.
+Prunus serotina Ehrh.
+Prunus serrulata Lindl.
+Prunus spinosa L.
+Pterocarya fraxinifolia (Poir.) Spach
+Pyrus communis L.
+Quercus cerris L.
+Quercus coccifera L.
+Quercus ilex L.
+Quercus palustris Münchh.
+Quercus petraea Liebl.
+Quercus pubescens Willd.
+Quercus robur L.
+Quercus rubra L.
+Quercus suber L.
+Rhododendron ferrugineum L.
+Rhus coriaria L.
+Rhus typhina L.
+Robinia pseudoacacia L.
+Salix alba L.
+Salix babylonica L.
+Salix caprea L.
+Salix cinerea L.
+Salix fragilis L.
+Sambucus ebulus L.
+Sambucus nigra L.
+Sambucus racemosa L.
+Sorbus aria (L.) Crantz
+Sorbus aucuparia L.
+Sorbus domestica L.
+Sorbus intermedia (Ehrh.) Pers.
+Sorbus torminalis (L.) Crantz
+Syringa vulgaris L.
+Taxus baccata L.
+Tilia cordata Mill.
+Tilia dasystyla Stev.
+Tilia platyphyllos Scop.
+Ulmus minor Mill.
+Viburnum lantana L.
+Viburnum opulus L.
+Viburnum rhytidophyllum Hemsl. ex F.B.Forbes & Hemsl.
+Viburnum tinus L.
+Vitex agnus-castus L.
