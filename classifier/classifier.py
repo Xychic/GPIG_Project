@@ -63,7 +63,7 @@ class SquarePad(object):
         self.padding_mode = padding_mode
 
     def get_padding(self,img):
-        w, h = img.size
+        h, w = img.size()[-2:]
         max_wh = max(w, h)
         h_padding = (max_wh - w) / 2
         v_padding = (max_wh - h) / 2
@@ -77,7 +77,7 @@ image_rescale = transforms.Compose([SquarePad(padding_mode="reflect"),transforms
 with open(os.path.abspath("dataset_filter\\listSpecies.txt")) as f:
     species_list = f.read().splitlines()
 
-dat = TreeSpeciesDataset(os.path.abspath("..\\trees"),species_list)
+dat = TreeSpeciesDataset(os.path.abspath("..\\trees"),species_list,image_rescale)
 max_width = 0
 max_height = 0
 min_width = 10000
