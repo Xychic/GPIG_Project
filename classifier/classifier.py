@@ -1,8 +1,10 @@
 import torch
 from torchvision.io import read_image
+from torchvision import transforms 
 from sklearn.model_selection import train_test_split
 import os
 import sys
+import math
 sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 from dataset_filter.dataset_filter import getContent, binIndex
 
@@ -54,6 +56,23 @@ def safe_train_test_split(dataset,test_size): #"adapted" from eric's answer on h
     train_split = torch.utils.data.Subset(dataset, train_indices)
     test_split = torch.utils.data.Subset(dataset, test_indices)
     return train_split,test_split
+
+class SquarePad(object):
+    def __init__(self, fill=0, padding_mode='constant'):
+        self.fill = fill
+        self.padding_mode = padding_mode
+
+    def get_padding(self,img):
+        w, h = img.size
+        max_wh = max(w, h)
+        h_padding = (max_wh - w) / 2
+        v_padding = (max_wh - h) / 2
+        return math.floor(h_padding), math.floor(v_padding), math.ceil(h_padding), math.ceil(v_padding)
+        
+    def __call__(self, img):
+        return transforms.functional.pad(img, self.get_padding(img), self.fill, self.padding_mode)
+
+image_rescale = transforms.Compose([SquarePad(padding_mode="reflect"),transforms.Resize((512,512))])
 
 with open(os.path.abspath("dataset_filter\\listSpecies.txt")) as f:
     species_list = f.read().splitlines()
