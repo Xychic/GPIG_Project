@@ -54,3 +54,29 @@ def safe_train_test_split(dataset,test_size): #"adapted" from eric's answer on h
     train_split = torch.utils.data.Subset(dataset, train_indices)
     test_split = torch.utils.data.Subset(dataset, test_indices)
     return train_split,test_split
+
+with open(os.path.abspath("dataset_filter\\listSpecies.txt")) as f:
+    species_list = f.read().splitlines()
+
+dat = TreeSpeciesDataset(os.path.abspath("..\\trees"),species_list)
+max_width = 0
+max_height = 0
+min_width = 10000
+min_height = 10000
+species_dist = dict()
+for i in range(len(species_list)):
+    species_dist[i] = 0
+for i in range(len(dat)):
+    img,lab = dat[i]
+    size = img.size()
+    max_width = max(max_width,size[2])
+    max_height = max(max_height,size[1])
+    min_width = min(min_width,size[2])
+    min_height = min(min_height,size[1])
+    species_dist[lab] += 1
+print((max_width,max_height))
+print((min_width,min_height))
+print((min(species_dist.values()),max(species_dist.values())))
+for key, value in species_dist.items():
+    if value < 5:
+        print((species_list[key],value))
