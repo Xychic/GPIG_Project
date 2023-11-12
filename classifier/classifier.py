@@ -39,3 +39,18 @@ class TreeSpeciesDataset(torch.utils.data.Dataset):
         if self.target_transform:
             label = self.target_transform(label)
         return image, label
+
+def safe_train_test_split(dataset,test_size): #"adapted" from eric's answer on https://stackoverflow.com/questions/50544730/how-do-i-split-a-custom-dataset-into-training-and-test-datasets
+
+    # generate indices: instead of the actual data we pass in integers instead
+    train_indices, test_indices, _, _ = train_test_split(
+        range(len(dataset)),
+        dataset.targets,
+        stratify=dataset.targets,
+        test_size=test_size
+    )
+
+    # generate subset based on indices
+    train_split = torch.utils.data.Subset(dataset, train_indices)
+    test_split = torch.utils.data.Subset(dataset, test_indices)
+    return train_split,test_split
