@@ -55,7 +55,7 @@ def distanceBetweenNodes(nodeA:Node,nodeB:Node)-> float:
     a:float = math.sin(latitudeDelta/2)**2 + math.cos(Alat)*math.cos(Blat) * math.sin(longitudeDelta/2)**2
     c:float = 2* math.asin(math.sqrt(a))
     EarthRadius:float = 6371000
-    result:float = EarthRadius * EarthRadius
+    result:float = EarthRadius * c
     return result
 
 
