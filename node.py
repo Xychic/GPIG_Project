@@ -44,7 +44,6 @@ def distanceBetweenNodes(nodeA:Node,nodeB:Node)-> float:
     """Returns the distance in M between 
     two nodes calculated from their latitudes
     and longitudes using the haversine formula"""
-    result:float
     #Convert to radians
     Alat:float = math.radians(nodeA.lat)
     Alon:float = math.radians(nodeA.lon)
