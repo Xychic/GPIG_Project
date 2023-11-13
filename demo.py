@@ -1,5 +1,5 @@
 import IdDictionary
-from node import Map, Node, NodeEdge
+from node import Map, Node, NodeEdge , distanceBetweenNodes
 
 # A node can be made up of any type as we simply use its ID as a reference
 # A edge is simply a tuple of 3 things (NodeA, NodeB, Weight) it is bi-directional
@@ -44,3 +44,9 @@ tree_map.add_edge("C", "D", 3)
 tree_map.add_edge("D", "A", 4)
 
 print(tree_map)
+
+#Distance Calculation
+centralHallNode = Node("Central Hall",53.94703,-1.05284)
+compSciNode = Node("Dep of Computer Science",53.94682,-1.03086)
+
+print(f"Distance between{centralHallNode} and {compSciNode} is {distanceBetweenNodes(centralHallNode,compSciNode)} ")
