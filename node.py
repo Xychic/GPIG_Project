@@ -29,7 +29,7 @@ class Node:
     id: str
     lat: float
     lon: float
-    neighbour_ids: set[str] = set()
+    _neighbour_ids: set[str] = set()
 
     def __post_init__(self):
         if not -90 <= self.lat <= 90:
@@ -40,11 +40,11 @@ class Node:
     def __repr__(self) -> str:
         return f"Node({self.id}@({self.lat},{self.lon}))"
     def getNeighbours(self)->set[str]:
-        return self.neighbour_ids
+        return self._neighbour_ids
     def addNeighbours(self,id:str):
-        self.neighbour_ids.add(id)
+        self._neighbour_ids.add(id)
     def removeNeighbour(self,id:str):
-        self.neighbour_ids.remove(id)
+        self._neighbour_ids.remove(id)
 def distanceBetweenNodes(nodeA:Node,nodeB:Node)-> float:
     """Returns the distance in M between 
     two nodes calculated from their latitudes
@@ -127,6 +127,8 @@ class Map:
         return Null
 
     def get_node_neighbours(self,node_id:str)-> Option[list[str]]:
+        """Returns a list of Ids of nodes that are connected to node_id
+        """
         if node_id in self.nodes.keys():
             match self.get_node(node_id):
                 case Some(node):
