@@ -1,0 +1,49 @@
+Acer monspessulanum L.
+Acer negundo L.
+Aesculus hippocastanum L.
+Arbutus unedo L.
+Betula pendula Roth
+Betula utilis D.Don
+Carpinus betulus L.
+Castanea sativa Mill.
+Celtis australis L.
+Cornus mas L.
+Crataegus monogyna Jacq.
+Ficus carica L.
+Fraxinus angustifolia Vahl
+Fraxinus excelsior L.
+Fraxinus ornus L.
+Juniperus oxycedrus L.
+Larix decidua Mill.
+Laurus nobilis L.
+Liquidambar styraciflua L.
+Magnolia grandiflora L.
+Melia azedarach L.
+Olea europaea L.
+Pinus cembra L.
+Pinus halepensis Mill.
+Pinus mugo Turra
+Pinus nigra Arnold
+Pinus pinaster Aiton
+Pinus sylvestris L.
+Pistacia lentiscus L.
+Platanus orientalis L.
+Populus nigra L.
+Prunus avium (L.) L.
+Prunus dulcis (Mill.) D.A.Webb
+Prunus laurocerasus L.
+Pterocarya fraxinifolia (Poir.) Spach
+Quercus cerris L.
+Quercus ilex L.
+Quercus pubescens Willd.
+Quercus robur L.
+Quercus suber L.
+Rhododendron ferrugineum L.
+Rhus coriaria L.
+Salix alba L.
+Sambucus ebulus L.
+Sambucus nigra L.
+Sorbus aria (L.) Crantz
+Tilia dasystyla Stev.
+Ulmus minor Mill.
+Viburnum tinus L.
