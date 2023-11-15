@@ -2,11 +2,12 @@ import torch
 from torchvision.io import read_image
 from torchvision import transforms 
 from sklearn.model_selection import train_test_split
+import numpy as np
 import os
 import sys
 import math
 sys.path.append(os.path.join(os.path.dirname(__file__),".."))
-from dataset_filter.dataset_filter import getContent, binIndex
+from dataset_filter.dataset_filter import getContent, binSearch
 
 class TreeSpeciesDataset(torch.utils.data.Dataset):
     def __init__(self, tree_dir, species_list, transform=None, target_transform=None):
@@ -15,18 +16,22 @@ class TreeSpeciesDataset(torch.utils.data.Dataset):
         self.target_transform = target_transform
         #create species to id map
         self.species_dict = dict()
+        self.distrib = []
         for i in range(len(species_list)):
             self.species_dict[species_list[i]] = i
+            self.distrib.append(0)
         #get and store image id pairs
         self.records = []
         for file in os.listdir(tree_dir):
             if file[-4:] == ".xml":
                 species = getContent(self.tree_dir,file)[1]
-                if species is not None:#seems to be a valid xml file, a species tag was found
+                if binSearch(species,species_list):#seems to be a valid xml file, a valid species tag was found
                     if os.path.isfile(os.path.join(self.tree_dir,file[:-4] + ".png")):
                         self.records.append((file[:-4] + ".png",self.species_dict[species]))
+                        self.distrib[self.species_dict[species]] += 1
                     elif os.path.isfile(os.path.join(self.tree_dir,file[:-4] + ".jpg")):
                         self.records.append((file[:-4] + ".jpg",self.species_dict[species]))
+                        self.distrib[self.species_dict[species]] += 1
         
     def __len__(self):
         return len(self.records)
@@ -72,8 +77,69 @@ class SquarePad(object):
     def __call__(self, img):
         return transforms.functional.pad(img, self.get_padding(img), self.fill, self.padding_mode)
 
-image_rescale = transforms.Compose([SquarePad(padding_mode="symmetric"),transforms.Resize((512,512))])
-image_rescale2 = transforms.v2.RandomCrop(512,pad_if_needed = True,padding_mode='symmetric')
+class ImageRescale(object):
+    def __init__(self,size,padding_mode="symmetric"):
+        self.trans = transforms.Compose([SquarePad(padding_mode=padding_mode),transforms.Resize((size,size))])
+    def __call__(self,inp):
+        return self.trans(inp)
+
+class ImageCrop(object):
+    def __init__(self,size,padding_mode="symmetric"):
+        self.trans = transforms.RandomCrop(size,pad_if_needed = True,padding_mode=padding_mode)
+    def __call__(self,inp):
+        return self.trans(inp)
+
+class RandRot90(object):
+    def __call__(self, inp):
+        for i in range(np.random.randint(0,3)):
+            inp = torch.rot90(inp,1,[-2,-1])
+        return inp
+
+class RandPosterize(object):
+    def __init__(self,min_bits,max_bits):
+        self.min_bits = min_bits
+        self.max_bits = max_bits
+
+    def __call__(self, inp):
+        bits = np.random.randint(self.min_bits,self.max_bits)
+        inp = transforms.functional.posterize(inp,bits)
+        return inp
+
+class RandSharpness(object):
+    def __init__(self,min_sharp,max_sharp):
+        self.min_sharp = min_sharp
+        self.max_sharp = max_sharp
+
+    def __call__(self, inp):
+        sharp = self.min_sharp + np.random.random()*(self.max_sharp - self.min_sharp)
+        inp = transforms.functional.adjust_sharpness(inp,sharp)
+        return inp
+
+
+class UniformRandomOrderSubset(object): #equal chance to apply none, one, two,..., or all of the transforms
+    def __init__(self,transfroms):
+        self.transforms = transforms
+    
+    def __call__(self,inp):
+        np.random.shuffle(self.transforms)
+        for i in range(np.random.randint(0,len(self.indices))):
+            inp = self.transforms[i](inp)
+        return inp
+        
+
+#non-disruptive augments, these shouldn't make image recognition harder, but will make the dataset effectively 16x bigger
+non_dist_augments = transforms.Compose([
+    transforms.RandomHorizontalFlip(0.5),
+    transforms.RandomVerticalFlip(0.5),
+    RandRot90(),#could instead have random perspective etc. but those can introduce blackspace
+])
+#semi-disruptive augments, these can make image recognition harder, but could be present in a dataset image -> likely to be harder than the irl defects 
+semi_dist_augments = UniformRandomOrderSubset([
+    transforms.ColorJitter(0.5,0.5,0.5,0.25),
+    transforms.GaussianBlur(7, (0.01,3.0)),
+    RandSharpness(0.5,1.5)
+])
+#transforms.RandomPosterize(6,8) #don't think images are likely to be affected by this
 
 class Resnet_block(torch.nn.Module):
     def __init__(self,channels_in,channels,reduction = "this is just so both blocks have same input",stride = 1,layers = 2):
@@ -135,7 +201,7 @@ class Resnet_bottle_block(torch.nn.Module):
         return x
 
 class Resnetish(torch.nn.Module):
-    def __init__(self,num_classes,image_size,stages,block,starting_channels = 32,reduction = 4):#reduction only for bottleblocks
+    def __init__(self,num_classes,image_size,stages,block,starting_channels = 64,reduction = 4):#reduction only for bottleblocks
         super(Resnetish,self).__init__()
         reduction = 2*2*(2**len(stages - 1))
         layers = []
@@ -157,7 +223,7 @@ class Resnetish(torch.nn.Module):
             cur_channels = next_channels
             
         layers.append(torch.nn.AdaptiveAvgPool2d((1, 1)))
-        cur_channels = 1#thats what that pooling does?
+        image_size = 1#thats what that pooling does
         layers.append(torch.nn.Flatten())
         outsize = cur_channels*image_size*image_size
         layers.append(torch.nn.Linear(outsize,num_classes))
@@ -183,28 +249,27 @@ class Resnetish(torch.nn.Module):
     def forward(self,inp):
          return self.main(inp)
 
-with open(os.path.abspath("dataset_filter\\listSpecies.txt")) as f:
-    species_list = f.read().splitlines()
+# with open(os.path.abspath(os.path.join("dataset_filter","listCommonSpecies.txt"))) as f:
+#     species_list = f.read().splitlines()
 
-dat = TreeSpeciesDataset(os.path.abspath("..\\trees"),species_list,image_rescale)
-max_width = 0
-max_height = 0
-min_width = 10000
-min_height = 10000
-species_dist = dict()
-for i in range(len(species_list)):
-    species_dist[i] = 0
-for i in range(len(dat)):
-    img,lab = dat[i]
-    size = img.size()
-    max_width = max(max_width,size[2])
-    max_height = max(max_height,size[1])
-    min_width = min(min_width,size[2])
-    min_height = min(min_height,size[1])
-    species_dist[lab] += 1
-print((max_width,max_height))
-print((min_width,min_height))
-print((min(species_dist.values()),max(species_dist.values())))
-for key, value in species_dist.items():
-    if value < 5:
-        print((species_list[key],value))
+# dat = TreeSpeciesDataset(os.path.abspath(os.path.join("..","trees")),species_list,ImageRescale(512))
+# max_width = 0
+# max_height = 0
+# min_width = 10000
+# min_height = 10000
+# species_dist = dict()
+# for i in range(len(species_list)):
+#     species_dist[i] = 0
+# for i in range(len(dat)):
+#     img,lab = dat[i]
+#     size = img.size()
+#     max_width = max(max_width,size[2])
+#     max_height = max(max_height,size[1])
+#     min_width = min(min_width,size[2])
+#     min_height = min(min_height,size[1])
+#     species_dist[lab] += 1
+# print((max_width,max_height))
+# print((min_width,min_height))
+# print((min(species_dist.values()),max(species_dist.values())))
+# for key, value in species_dist.items():
+#     print((species_list[key],value))
