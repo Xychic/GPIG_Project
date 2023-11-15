@@ -249,6 +249,45 @@ class Resnetish(torch.nn.Module):
     def forward(self,inp):
          return self.main(inp)
 
+#thanks project last year
+class CoolRate():
+    def __init__(self,_min = 10,_base = 10):
+        self._min = _min
+        self._base = _base
+        self.rate_factor = 1.0
+    def __call__(self,x,y,z):
+        if z > self._min:
+            if y*2 > z: #only when an actual rate has been done
+                self.rate_factor = self.rate_factor*(y*2/z)
+            else:
+                self.rate_factor = (self.rate_factor + max(1,self.rate_factor*(y*2/z)))/2
+        print("     %.3f" % (self.rate_factor),end='\r')
+        return max(self._min, self.rate_factor*self._base * 2**(-math.log(x,10)))
+
+class ProgressMade:
+    def __init__(self,minimum, rate = lambda loss_diff,since_improve,prior_rate: 10,accu_instead_loss = False):
+        self.rate = rate #result of rate is how long can progress not be made for, it is fed the last improvement
+        self.min_loss = float("inf")
+        self.since_improve = 0
+        self.cur_rate = 10
+        self.count = minimum
+        self.a_i_l = accu_instead_loss
+    def __call__(self,loss,accu):
+        if self.a_i_l:
+            loss = accu
+        self.count -= 1
+        if loss < self.min_loss:
+            self.cur_rate = self.rate(self.min_loss - loss,self.since_improve,self.cur_rate)
+            self.since_improve = 0
+            self.min_loss = loss
+            print(int(self.cur_rate))
+            return False
+        elif self.count < 0 and self.since_improve > self.cur_rate:
+            return True
+        else:
+            self.since_improve += 1
+            return False
+
 # with open(os.path.abspath(os.path.join("dataset_filter","listCommonSpecies.txt"))) as f:
 #     species_list = f.read().splitlines()
 
