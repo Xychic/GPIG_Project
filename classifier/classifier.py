@@ -39,7 +39,7 @@ class TreeSpeciesDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         record = self.records[idx]
         img_path = os.path.join(self.tree_dir, record[0])
-        image = read_image(img_path)
+        image = read_image(img_path)/255. #convert from 0-255 to 0.0-1.0
         label = record[1]
         if self.transform:
             image = self.transform(image)
@@ -50,10 +50,11 @@ class TreeSpeciesDataset(torch.utils.data.Dataset):
 def safe_train_test_split(dataset,test_size): #"adapted" from eric's answer on https://stackoverflow.com/questions/50544730/how-do-i-split-a-custom-dataset-into-training-and-test-datasets
 
     # generate indices: instead of the actual data we pass in integers instead
+    targets = [rec[1] for rec in dataset.records]
     train_indices, test_indices, _, _ = train_test_split(
         range(len(dataset)),
-        dataset.targets,
-        stratify=dataset.targets,
+        targets,
+        stratify=targets,
         test_size=test_size
     )
 
@@ -163,7 +164,7 @@ class Resnet_block(torch.nn.Module):
             block_layers.append(torch.nn.ReLU())
     
         self.main = torch.nn.Sequential(*block_layers)#unpack list into sequential
-        self.resid = torch.nn.Conv2d(channels_in,channels,1,stride,1) #the residual layer the input is fed through
+        self.resid = torch.nn.Conv2d(channels_in,channels,1,stride,1) #the residual layer the input is fed through #[here] when stride = 2 even sized input fails cause padding?
         self.relu = torch.nn.ReLU()
         self.norm = torch.nn.BatchNorm2d(channels)
 
@@ -203,7 +204,7 @@ class Resnet_bottle_block(torch.nn.Module):
 class Resnetish(torch.nn.Module):
     def __init__(self,num_classes,image_size,stages,block,starting_channels = 64,reduction = 4):#reduction only for bottleblocks
         super(Resnetish,self).__init__()
-        reduction = 2*2*(2**len(stages - 1))
+        reduction = 2*(2**len(stages)) #should be stages -1 but I removed one of the *2s from the start
         layers = []
         layers.append(torch.nn.Conv2d(3,starting_channels,7,3,2,padding_mode='zeros', bias=False))
         image_size /=2
@@ -288,27 +289,29 @@ class ProgressMade:
             self.since_improve += 1
             return False
 
-# with open(os.path.abspath(os.path.join("dataset_filter","listCommonSpecies.txt"))) as f:
-#     species_list = f.read().splitlines()
+# if __name__ == "__main__":
+#     main()
+    # with open(os.path.abspath(os.path.join("dataset_filter","listCommonSpecies.txt"))) as f:
+    #     species_list = [line.replace('\r', '') for line in f.read().splitlines()] #if windows file make good for linux
 
-# dat = TreeSpeciesDataset(os.path.abspath(os.path.join("..","trees")),species_list,ImageRescale(512))
-# max_width = 0
-# max_height = 0
-# min_width = 10000
-# min_height = 10000
-# species_dist = dict()
-# for i in range(len(species_list)):
-#     species_dist[i] = 0
-# for i in range(len(dat)):
-#     img,lab = dat[i]
-#     size = img.size()
-#     max_width = max(max_width,size[2])
-#     max_height = max(max_height,size[1])
-#     min_width = min(min_width,size[2])
-#     min_height = min(min_height,size[1])
-#     species_dist[lab] += 1
-# print((max_width,max_height))
-# print((min_width,min_height))
-# print((min(species_dist.values()),max(species_dist.values())))
-# for key, value in species_dist.items():
-#     print((species_list[key],value))
+    # dat = TreeSpeciesDataset(os.path.abspath(os.path.join("..","trees")),species_list,ImageRescale(512))
+    # max_width = 0
+    # max_height = 0
+    # min_width = 10000
+    # min_height = 10000
+    # species_dist = dict()
+    # for i in range(len(species_list)):
+    #     species_dist[i] = 0
+    # for i in range(len(dat)):
+    #     img,lab = dat[i]
+    #     size = img.size()
+    #     max_width = max(max_width,size[2])
+    #     max_height = max(max_height,size[1])
+    #     min_width = min(min_width,size[2])
+    #     min_height = min(min_height,size[1])
+    #     species_dist[lab] += 1
+    # print((max_width,max_height))
+    # print((min_width,min_height))
+    # print((min(species_dist.values()),max(species_dist.values())))
+    # for key, value in species_dist.items():
+    #     print((species_list[key],value))
