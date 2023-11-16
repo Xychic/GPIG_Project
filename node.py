@@ -155,7 +155,15 @@ class Map:
             case _:
                 # Error Handling
                 pass
+    def getID(self,node:Node)-> str:
+            for k in self.nodes:
+                if self.nodes[k] == node:
+                    return k
+            raise LookupError
 
     def remove_edge(self, edge_id: str) -> None:
+        edge:NodeEdge =self.edges[edge_id]
+        edge.node_a.removeNeighbour(self.getID(edge.node_b))
+        edge.node_b.removeNeighbour(self.getID(edge.node_a))
         del self.edges[edge_id]
         # TODO Silent errors
