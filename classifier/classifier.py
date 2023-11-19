@@ -142,6 +142,22 @@ semi_dist_augments = UniformRandomOrderSubset([
 ])
 #transforms.RandomPosterize(6,8) #don't think images are likely to be affected by this
 
+def oddCrop(inp): #crop when odd
+    out = inp
+    if out.shape[-1] % 2 == 1:
+        out = transforms.functional.crop(out,0,0,out.shape[-2],out.shape[-1] - 1)
+    if out.shape[-2] % 2 == 1:
+        out = transforms.functional.crop(out,0,0,out.shape[-2] - 1,out.shape[-1])
+    return out
+
+def evenPad(inp): #pad when even
+    out = inp
+    if out.shape[-1] % 2 == 0:
+        out = torch.nn.functional.pad(out,(0,1,0,0))
+    if out.shape[-2] % 2 == 0:
+        out = torch.nn.functional.pad(out,(0,0,0,1))
+    return out
+
 class Resnet_block(torch.nn.Module):
     def __init__(self,channels_in,channels,reduction = "this is just so both blocks have same input",stride = 1,layers = 2):
         super(Resnet_block,self).__init__()
@@ -150,11 +166,15 @@ class Resnet_block(torch.nn.Module):
         #manditory first layer
         if layers < 1:
             raise ValueError("Resnet_block needs at least 1 layer, has " + str(layers))
-        block_layers = [
-            torch.nn.Conv2d(channels_in,channels,3,stride,1,padding_mode='zeros', bias=False),
+        block_layers = []
+        if stride == 1:
+            block_layers.append(torch.nn.Conv2d(channels_in,channels,3,1,1,padding_mode='zeros', bias=False))
+        else:
+            block_layers.append(torch.nn.Conv2d(channels_in,channels,3,stride,0,padding_mode='zeros', bias=False))
+        block_layers.extend([
             torch.nn.BatchNorm2d(channels),
             torch.nn.ReLU()
-        ]
+        ])
         #additional layers (allows custom numbers of layers)
         add_layers = layers - 1
         for i in range(add_layers):
@@ -164,13 +184,14 @@ class Resnet_block(torch.nn.Module):
             block_layers.append(torch.nn.ReLU())
     
         self.main = torch.nn.Sequential(*block_layers)#unpack list into sequential
-        self.resid = torch.nn.Conv2d(channels_in,channels,1,stride,1) #the residual layer the input is fed through #[here] when stride = 2 even sized input fails cause padding?
+        self.resid = torch.nn.Sequential(torch.nn.Conv2d(channels_in,channels,1,stride),torch.nn.BatchNorm2d(channels)) #the residual layer the input is fed through
+        self.half_pad = torch.nn.ZeroPad2d((0,1,0,1))
         self.relu = torch.nn.ReLU()
         self.norm = torch.nn.BatchNorm2d(channels)
 
     def forward(self,inp):
-        x = self.main(inp)
-        x += (inp if self.stride == 1 else self.resid(inp))#self.resid(inp) #apply residual
+        x = self.main(inp if self.stride == 1 else evenPad(inp))
+        x += inp if self.stride == 1 else self.resid(oddCrop(inp))#self.resid(inp) #apply residual
         x = self.norm(x)
         x = self.relu(x) #the missing activation from the residual block
         return x
@@ -180,23 +201,29 @@ class Resnet_bottle_block(torch.nn.Module):
         super(Resnet_block,self).__init__()
         self.stride = stride
         #the residual block
-        self.main = torch.nn.Sequential(
+        block_layers = [        
             torch.nn.Conv2d(channels_in,channels_in/reduction,1,1,1,padding_mode='zeros', bias=False),
             torch.nn.BatchNorm2d(channels_in/reduction),
-            torch.nn.ReLU(),
-            torch.nn.Conv2d(channels_in/reduction,channels/reduction,3,stride,1,padding_mode='zeros', bias=False),
+            torch.nn.ReLU()
+        ]
+        if stride == 1:
+            torch.nn.Conv2d(channels_in/reduction,channels/reduction,3,1,1,padding_mode='zeros', bias=False)
+        else:
+            block_layers.append(torch.nn.Conv2d(channels_in/reduction,channels/reduction,3,stride,0,padding_mode='zeros', bias=False))
+        block_layers.extend([
             torch.nn.BatchNorm2d(channels/reduction),
             torch.nn.ReLU(),
             torch.nn.Conv2d(channels/reduction,channels,1,1,1,padding_mode='zeros', bias=False),
             torch.nn.BatchNorm2d(channels)
-        )
-        self.resid = torch.nn.Conv2d(channels_in,channels,1,stride,1) #the residual layer the input is fed through
+        ])
+        self.main = torch.nn.Sequential(*block_layers)
+        self.resid = torch.nn.Sequential(torch.nn.Conv2d(channels_in,channels,1,stride),torch.nn.BatchNorm2d(channels)) #the residual layer the input is fed through
         self.relu = torch.nn.ReLU()
         self.norm = torch.nn.BatchNorm2d(channels)
 
     def forward(self,inp):
-        x = self.main(inp)
-        x += (inp if self.stride == 1 else self.resid(inp))#self.resid(inp) #apply residual
+        x = self.main(inp if self.stride == 1 else evenPad(inp))
+        x += inp if self.stride == 1 else self.resid(inp)#self.resid(inp) #apply residual
         x = self.norm(x)
         x = self.relu(x) #the missing activation from the residual block
         return x
@@ -228,7 +255,7 @@ class Resnetish(torch.nn.Module):
         layers.append(torch.nn.Flatten())
         outsize = cur_channels*image_size*image_size
         layers.append(torch.nn.Linear(outsize,num_classes))
-        layers.append(torch.nn.Softmax())
+        layers.append(torch.nn.Softmax(dim=1))
 
         self.main = torch.nn.Sequential(*layers)
         # self.main = torch.nn.Sequential( #Bx3x512x512
