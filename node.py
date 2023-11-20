@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable
 from uuid import uuid4
 from Option import Null, Option, Some
@@ -29,7 +29,7 @@ class Node:
     id: str
     lat: float
     lon: float
-    _neighbour_ids: set[str] = set()
+    _neighbour_ids: set[str] = field(default_factory=set)
 
     def __post_init__(self):
         if not -90 <= self.lat <= 90:
@@ -45,6 +45,9 @@ class Node:
         self._neighbour_ids.add(id)
     def removeNeighbour(self,id:str):
         self._neighbour_ids.remove(id)
+    def __hash__(self) -> int:
+        return hash((self.id,self.lat,self.lon))
+    
 def distanceBetweenNodes(nodeA:Node,nodeB:Node)-> float:
     """Returns the distance in M between 
     two nodes calculated from their latitudes

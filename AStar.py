@@ -1,5 +1,5 @@
 from dataclasses import dataclass,field
-from node import Map,Node
+from node import Map,Node,distanceBetweenNodes
 from typing import Callable
 from queue import PriorityQueue
 
@@ -11,10 +11,11 @@ class PrioritizedItem:
     item: Node=field(compare=False)
 
 
+
     
 
 
-def AStar(StartNode:Node,GoalNode:Node,graph:Map,Heuristic:Callable[[Node,Node],float])->list[Node]:
+def AStar(StartNode:Node,GoalNode:Node,graph:Map,Heuristic:Callable[[Node,Node],float]=distanceBetweenNodes)->list[Node]:
 
     def reconstruct_path(current:Node)->list[Node]:
         route: list[Node]=[current]
@@ -33,8 +34,12 @@ def AStar(StartNode:Node,GoalNode:Node,graph:Map,Heuristic:Callable[[Node,Node],
     preceding_node:dict[Node,Node] = {}
     cost_to_node:dict[Node,float]={}
 
-
+    #for all nodes set their cost_to_node as infinite
+    for x in graph.nodes.values():
+        cost_to_node[x] = float('inf')
     cost_to_node[StartNode] = 0
+    
+
     unexplored_nodes.put(PrioritizedItem(0,StartNode))
     
 
@@ -69,3 +74,5 @@ def AStar(StartNode:Node,GoalNode:Node,graph:Map,Heuristic:Callable[[Node,Node],
 
 
     raise LookupError("No valid path")
+
+
