@@ -10,6 +10,10 @@ class Map:
         self.id_generator: Callable[[], str] = id_gen
         self.nodes: dict[str, Node] = {}
         self.edges: dict[str, NodeEdge] = {}
+        self.node_keys: set[str] = set()
+        self.edge_keys: set[str] = set()
+        self.width = 0
+        self.height = 0
 
     def __repr__(self) -> str:
         return f"""Map:
@@ -19,7 +23,11 @@ class Map:
     Edges: {self.edges}"""
 
     def add_node(self, node: Node) -> None:
+        self.node_keys.add(node.id)
         self.nodes[node.id] = node
+    
+    def has_node(self, node_id: str) -> bool:
+        return node_id in self.node_keys
 
     def get_node(self, node_id: str) -> Option[Node]:
         if node_id in self.nodes.keys():
@@ -34,9 +42,10 @@ class Map:
         # TODO Silent errors
 
     def add_edge(self, id_a: str, id_b: str, weight: float) -> None:
-        if self.get_edge(id_a, id_b).is_some():
+        if f"{id_a}-{id_b}" in self.edge_keys or f"{id_b}-{id_a}" in self.edge_keys:
             raise Exception("Edge exists")
-            # TODO Either update edge, do nothing, 
+        # if self.get_edge(id_a, id_b).is_some():
+        #     # TODO Either update edge, do nothing, 
 
         match (self.get_node(id_a), self.get_node(id_b)):
             case (Some(a), Some(b)):
@@ -45,6 +54,7 @@ class Map:
                 #Update the neighbours of the nodes
                 a.addNeighbours(id_b)
                 b.addNeighbours(id_a)
+                self.edge_keys.add(f"{id_a}-{id_b}")
             case _:
                 # Error handling
                 pass
@@ -101,11 +111,13 @@ class Map:
 def from_map(map: str) -> Map:
     result = Map()
     for y,line in enumerate(map.splitlines()):
+        result.height = max(result.height, y)
         for x, char in enumerate(line):
+            result.width = max(result.width, x)
             if char != ".":
                 continue
             result.add_node(Node(f"{x}:{y}", x, y))
             for (dx, dy) in [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]:
-                if result.get_node(f"{dx}:{dy}").is_some():
+                if result.has_node(f"{dx}:{dy}"):
                     result.add_edge(f"{x}:{y}", f"{dx}:{dy}", 1)
     return result

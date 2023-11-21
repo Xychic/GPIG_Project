@@ -31,11 +31,11 @@ class Node:
     lon: float
     _neighbour_ids: set[str] = field(default_factory=set)
 
-    def __post_init__(self):
-        if not -90 <= self.lat <= 90:
-            raise ValueError(f"Invalid latitude {self.lat}")
-        if not -180 <= self.lon <= 180:
-            raise ValueError(f"Invalid longitude {self.lon}")
+    # def __post_init__(self):
+    #     if not -90 <= self.lat <= 90:
+    #         raise ValueError(f"Invalid latitude {self.lat}")
+    #     if not -180 <= self.lon <= 180:
+    #         raise ValueError(f"Invalid longitude {self.lon}")
 
     def __repr__(self) -> str:
         return f"Node({self.id}@({self.lat},{self.lon}))"
