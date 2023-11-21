@@ -1,5 +1,6 @@
 from dataclasses import dataclass,field
-from node import Map,Node,distanceBetweenNodes
+from node import Node,distanceBetweenNodes
+from Map import Map
 from typing import Callable
 from queue import PriorityQueue
 

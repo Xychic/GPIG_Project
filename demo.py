@@ -1,6 +1,13 @@
+from multiprocessing.util import is_abstract_socket_namespace
 import IdDictionary
-from node import Map, Node, NodeEdge , distanceBetweenNodes
+from Option import Some
+from node import Node, NodeEdge , distanceBetweenNodes
 from AStar import AStar
+import Map
+import PrintColours
+
+import node_lookup
+
 # A node can be made up of any type as we simply use its ID as a reference
 # A edge is simply a tuple of 3 things (NodeA, NodeB, Weight) it is bi-directional
 
@@ -32,22 +39,40 @@ for edge_id in edgeDict.get_ids():
     print(f"{edge} which translates to ({edge.node_a}, {edge.node_b}, {edge.weight})")
 
 
-tree_map = Map(idGen.gen_id)
-tree_map.add_node(a)
-tree_map.add_node(b)
-tree_map.add_node(c)
-tree_map.add_node(d)
+data = open("maze-32-32-4.map").read()
 
-tree_map.add_edge("A", "B", 1)
-tree_map.add_edge("B", "C", 2)
-tree_map.add_edge("C", "D", 3)
-tree_map.add_edge("D", "A", 4)
+tree_map = Map.from_map("\n".join(data.splitlines()[4:]))
 
-print(tree_map)
+start_1 = tree_map.get_node("0:0").unwrap()
+start_2 = tree_map.get_node("1:1").unwrap()
+end = tree_map.get_node("31:31").unwrap()
+print(start_1, start_2, end)
 
-print(AStar(a,d,tree_map))
+
+path = set(AStar(start_2, end, tree_map, lambda a, b: abs(a.lat - b.lat) + abs(a.lon - b.lon)))
+
+def show_path(path: list[str]):
+    for y in range(32):
+        for x in range(32):
+            node_id = f"{x}:{y}"
+            if tree_map.get_node(node_id).is_some():
+                if node_id in path:
+                    print(f"{PrintColours.FAIL}x{PrintColours.ENDC}", end="")
+                else:
+                    print(".", end="")
+            else:
+                print(f"{PrintColours.OKBLUE}@{PrintColours.ENDC}", end="")
+        print()
+    print(f"Total length: {len(path)}")
+
+
+show_path([p.id for p in path])
+# print(path)
+rust_path = node_lookup.get_path(tree_map.edges, "1:1", "31:31", lambda x, y: 0)
+show_path(rust_path)
 #Distance Calculation
 centralHallNode = Node("Central Hall",53.94703,-1.05284)
 compSciNode = Node("Dep of Computer Science",53.94682,-1.03086)
+
 
 print(f"Distance between{centralHallNode} and {compSciNode} is {distanceBetweenNodes(centralHallNode,compSciNode)} ")
