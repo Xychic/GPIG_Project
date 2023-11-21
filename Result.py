@@ -7,7 +7,10 @@ class Ok(Generic[T]):
         self._value: T = value
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, Ok) and self._value == other._value
+        if not isinstance(other, Ok):
+            return False
+        ok_other: Ok[T] = other
+        return self._value == ok_other._value
 
     def __ne__(self, other: Any) -> bool:
         return self != other
@@ -34,7 +37,10 @@ class Err(Generic[E]):
         self._value: E = value
 
     def __eq__(self, other: Any) -> bool:
-        return isinstance(other, Err) and self._value == other._value
+        if not isinstance(other, Err):
+            return False
+        err_other: Err[E] = other
+        return self._value == err_other._value
 
     def __ne__(self, other: Any) -> bool:
         return self != other

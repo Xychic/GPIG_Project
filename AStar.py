@@ -1,5 +1,6 @@
 from dataclasses import dataclass,field
-from node import Map,Node,distanceBetweenNodes
+from node import Node,distanceBetweenNodes
+from Map import Map
 from typing import Callable
 from queue import PriorityQueue
 
@@ -51,6 +52,8 @@ def AStar(StartNode:Node,GoalNode:Node,graph:Map,Heuristic:Callable[[Node,Node],
         explored_nodes.add(current_node)
         for node in current_node.getNeighbours():
             neighbour:Node = graph.get_node(node).unwrap()
+            if neighbour in explored_nodes:
+                continue
             cost:float = cost_to_node[current_node] + graph.get_edge(id(current_node),id(neighbour)).unwrap().weight
 
             if cost < cost_to_node[neighbour]:
