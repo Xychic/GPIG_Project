@@ -1,11 +1,13 @@
 import psycopg2
-
+from datetime import datetime
 
 DB_USER ="postgres"
 DB_PASS = "example"
 DB_HOST = "localhost"
 DB_PORT = "5432"
 DB_NAME="postgres"
+
+
 try:
 	conn = psycopg2.connect(dbname=DB_NAME,
 							user=DB_USER,
@@ -16,30 +18,59 @@ try:
 except:
     print("Database not connected successfully")
     exit()
-
-query:str = """
-        SELECT table_name, column_name, data_type
-        FROM information_schema.columns
-        WHERE table_schema = 'public'  -- Change 'public' to your schema name if needed
-        ORDER BY table_name, ordinal_position
-        """
-with conn.cursor() as curs:
-	try:
-		curs.execute(query)
-		schema_info = curs.fetchall()
-		for table_name, column_name, data_type in schema_info:
-			print(f"Table: {table_name}, Column: {column_name}, Type: {data_type}")
-	except (Exception, psycopg2.DatabaseError) as error:
-		print(error)
-		
-
-with conn.cursor() as curs:
-	try:
-		curs.execute
-	except (Exception, psycopg2.DatabaseError) as error:
-		print(error)
-		
+def getSchema():
+	query:str = """
+			SELECT table_name, column_name, data_type
+			FROM information_schema.columns
+			WHERE table_schema = 'public'  -- Change 'public' to your schema name if needed
+			ORDER BY table_name, ordinal_position
+			"""
+	with conn.cursor() as curs:
+		try:
+			curs.execute(query)
+			schema_info = curs.fetchall()
+			for table_name, column_name, data_type in schema_info:
+				print(f"Table: {table_name}, Column: {column_name}, Type: {data_type}")
+		except (Exception, psycopg2.DatabaseError) as error:
+			print(error)
+			
 
 
+def writeSensorData():
+	with conn.cursor() as curs:
+		insert_query = """
+		INSERT INTO sensor_data (co2_level, ozone_level,temperature,humidity,co_level,so2_level,no2_level,soil_moisture_level,soil_temperature,soil_humidity,soil_ph,date_recorded,anomalous)
+		VALUES (%s, %s,%s,%s,%s,%s,%s, %s,%s,%s,%s,%s,%s);
+		"""
+		data=(0,1,2,3,4,5,6,7,8,9,10,datetime.now(),True)
+		try:
+			curs.execute(insert_query,data)
+		except (Exception, psycopg2.DatabaseError) as error:
+			print(error)
 
+def writeNodeData():
+	with conn.cursor() as curs:
+		insert_query = """
+		INSERT INTO nodes ( lat, lon)
+		VALUES (%s, %s);
+		"""
+		data=(1,1)
+		try:
+			curs.execute(insert_query,data)
+		except (Exception, psycopg2.DatabaseError) as error:
+			print(error)
+def selectAllFromTable(table:str):
+	select_query = f"SELECT * FROM {table};"
+	with conn.cursor() as curs:
+		try:
+			curs.execute(select_query)
+			records = curs.fetchall()
+			for record in records:
+				print(f"{record} \n") 
+		except (Exception, psycopg2.DatabaseError) as error:
+			print(error)
+
+writeSensorData()
+selectAllFromTable("sensor_data")
+conn.commit()
 conn.close()
