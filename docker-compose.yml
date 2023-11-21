@@ -6,8 +6,12 @@ services:
   db:
     image: postgres
     restart: always
+    ports:
+        - 5432:5432
     environment:
+      
       POSTGRES_PASSWORD: example
+      
     volumes:
       - ./docker-entrypoint-initdb.d/:/docker-entrypoint-initdb.d/:z
 
