@@ -1,3 +1,4 @@
+import math
 from multiprocessing.util import is_abstract_socket_namespace
 import IdDictionary
 from Option import Some
@@ -39,17 +40,11 @@ for edge_id in edgeDict.get_ids():
     print(f"{edge} which translates to ({edge.node_a}, {edge.node_b}, {edge.weight})")
 
 
+
 data = open("maze-32-32-4.map").read()
 
 tree_map = Map.from_map("\n".join(data.splitlines()[4:]))
 
-start_1 = tree_map.get_node("0:0").unwrap()
-start_2 = tree_map.get_node("1:1").unwrap()
-end = tree_map.get_node("31:31").unwrap()
-print(start_1, start_2, end)
-
-
-path = set(AStar(start_2, end, tree_map, lambda a, b: abs(a.lat - b.lat) + abs(a.lon - b.lon)))
 
 def show_path(path: list[str]):
     for y in range(32):
@@ -65,10 +60,37 @@ def show_path(path: list[str]):
         print()
     print(f"Total length: {len(path)}")
 
+start = "9:6"
+end = "11:21"
+print(start, end)
+
+path = set(AStar(tree_map.get_node(start).unwrap(), tree_map.get_node(end).unwrap(), tree_map, lambda a, b: abs(a.lat - b.lat) + abs(a.lon - b.lon)))
 
 show_path([p.id for p in path])
-# print(path)
-rust_path = node_lookup.get_path(tree_map.edges, "1:1", "31:31", lambda x, y: 0)
+print(path)
+
+def heuristic(a: tuple[float, float], b: tuple[float, float]) -> int:
+    (a_lat, a_lon) = a
+    (b_lat, b_lon) = b
+    return int(abs(a_lat - b_lat) + abs(a_lon - b_lon))
+
+def heuristic_b(a: tuple[float, float], b: tuple[float, float]) -> int:
+    (a_lat, a_lon) = a
+    (b_lat, b_lon) = b
+    Alat:float = math.radians(a_lat)
+    Alon:float = math.radians(a_lon)
+    Blat:float = math.radians(b_lat)
+    Blon:float = math.radians(b_lon)
+    latitudeDelta:float = Alat - Blat
+    longitudeDelta:float = Alon - Blon
+    x:float = math.sin(latitudeDelta/2)**2 + math.cos(Alat)*math.cos(Blat) * math.sin(longitudeDelta/2)**2
+    c:float = 2* math.asin(math.sqrt(x))
+    EarthRadius:float = 6371000
+    result:float = EarthRadius * c
+    return int(result)
+
+
+rust_path = node_lookup.get_path(tree_map.edges, start, end, heuristic)
 show_path(rust_path)
 #Distance Calculation
 centralHallNode = Node("Central Hall",53.94703,-1.05284)

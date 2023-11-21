@@ -20,18 +20,22 @@ impl Map {
         for (_, v) in edge_dict.items(py) {
             let edge: NodeEdge = v.extract(py).unwrap();
             connections
-            .entry(edge.node_a.id.clone())
-            .or_insert_with(Vec::new)
-            .push(edge.id.clone());
-        connections
-        .entry(edge.node_b.id.clone())
-        .or_insert_with(Vec::new)
-        .push(edge.id.clone());
+                .entry(edge.node_a.id.clone())
+                .or_insert_with(Vec::new)
+                .push(edge.id.clone());
+            connections
+                .entry(edge.node_b.id.clone())
+                .or_insert_with(Vec::new)
+                .push(edge.id.clone());
             nodes.insert(edge.node_a.id.clone(), edge.node_a.clone());
             nodes.insert(edge.node_b.id.clone(), edge.node_b.clone());
             edges.insert(edge.id.clone(), edge);
         }
-        Map { edges, nodes, connections }
+        Map {
+            edges,
+            nodes,
+            connections,
+        }
     }
 
     pub fn get_weight(&self, node_a_id: &str, node_b_id: &str) -> Option<f64> {
