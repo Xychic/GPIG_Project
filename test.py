@@ -33,6 +33,13 @@ with conn.cursor() as curs:
 		print(error)
 		
 
+with conn.cursor() as curs:
+	try:
+		curs.execute
+	except (Exception, psycopg2.DatabaseError) as error:
+		print(error)
+		
+
 
 
 conn.close()
