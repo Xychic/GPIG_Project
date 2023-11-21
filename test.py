@@ -1,6 +1,6 @@
 import psycopg2
 from datetime import datetime
-
+import sensordata
 DB_USER ="postgres"
 DB_PASS = "example"
 DB_HOST = "localhost"
@@ -36,7 +36,7 @@ def getSchema():
 			
 
 
-def writeSensorData():
+def writeSensorDataExample():
 	with conn.cursor() as curs:
 		insert_query = """
 		INSERT INTO sensor_data (co2_level, ozone_level,temperature,humidity,co_level,so2_level,no2_level,soil_moisture_level,soil_temperature,soil_humidity,soil_ph,date_recorded,anomalous)
@@ -47,7 +47,17 @@ def writeSensorData():
 			curs.execute(insert_query,data)
 		except (Exception, psycopg2.DatabaseError) as error:
 			print(error)
-
+def writeSensorData(sensorData:sensordata.SensorData):
+	with conn.cursor() as curs:
+		insert_query = """
+		INSERT INTO sensor_data (co2_level, ozone_level,temperature,humidity,co_level,so2_level,no2_level,soil_moisture_level,soil_temperature,soil_humidity,soil_ph,date_recorded,anomalous)
+		VALUES (%s, %s,%s,%s,%s,%s,%s, %s,%s,%s,%s,%s,%s);
+		"""
+		data=(sensorData.co2_level,sensorData.ozone_level,sensorData.temperature,sensorData.co_level,sensorData.so2_level,sensorData,sensorData.no2_level,sensorData.soil_moisture_level,sensorData.soil_temperature_level,sensorData.soil_humidity_level,sensorData.soil_ph,sensorData.date,sensorData.anomalous)
+		try:
+			curs.execute(insert_query,data)
+		except (Exception, psycopg2.DatabaseError) as error:
+			print(error)
 def writeNodeData():
 	with conn.cursor() as curs:
 		insert_query = """
@@ -70,7 +80,7 @@ def selectAllFromTable(table:str):
 		except (Exception, psycopg2.DatabaseError) as error:
 			print(error)
 
-writeSensorData()
+writeSensorDataExample()
 selectAllFromTable("sensor_data")
 conn.commit()
 conn.close()
