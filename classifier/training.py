@@ -15,7 +15,7 @@ identityer = optimFactory(torch.nn.Identity)
 #variables dictating training
 traintypes = [#augmentation,optimizer,scheduler,weighted,epoch,limit,accuracy
     [torch.nn.Identity(),resnet_base_SGD,None,False,10,lambda loss,accu: False,True],
-    [classifier.non_dist_augments,resnet_base_SGD,lr_plataeau,False,100,classifier.ProgressMade(50,classifier.CoolRate(15,15)),True],
+    [classifier.non_dist_augments,resnet_base_SGD,lr_plataeau,True,100,classifier.ProgressMade(15,classifier.CoolRate(15,15)),True],
     [classifier.non_dist_augments,defaultAdamOptim,None,True,100,classifier.ProgressMade(15,classifier.CoolRate(15,15)),False],
     [torch.nn.Identity(),defaultAdamOptim,None,False,1,lambda loss,accu: False,False]
 ]
@@ -23,7 +23,8 @@ traintypes = [#augmentation,optimizer,scheduler,weighted,epoch,limit,accuracy
 modeltypes = [#class,image_corrector,batch_size,image_size,other class variables... (e.g. stages,block,starting_channels,reduction)
     [classifier.Resnetish,identityer,1,480,[3,4,6,3],classifier.Resnet_block,64,4],
     [classifier.Resnetish,classifier.ImageCrop,32,480,[3,4,6,3],classifier.Resnet_block,64,4],
-    [classifier.Resnetish,classifier.ImageRescale,32,480,[3,4,6,3],classifier.Resnet_block,32,4]
+    [classifier.Resnetish,classifier.ImageRescale,32,480,[3,4,6,3],classifier.Resnet_block,32,4],
+    [classifier.Resnetish,classifier.ImageRescale,32,480,[3,4,6,3],classifier.Resnet_bottle_block,64,4]
 ]
 
 def CalcAccu(model,test_data):
@@ -80,7 +81,7 @@ def interTrain(model,optim,scheduler,data,augment,losser,epochs,limit,testing_da
     return (all_loss, all_accu) if testing_data else all_loss
 
 def main():
-    sys.argv = ["training.py",os.path.join("..","trees"),os.path.join("dataset_filter","listCommonSpecies.txt"),"-1","2",os.path.join("classifier","test1.pt")]
+    sys.argv = ["training.py",os.path.join("..","trees"),os.path.join("dataset_filter","listCommonSpecies.txt"),"1","3",os.path.join("classifier","test1.pt")]
     if len(sys.argv) < 4 or len(sys.argv) > 7:
         print("training.py inputdir speciesListFile traintype [modeltype [modelfilesave [modelfileload]]]]")
         sys.exit()
@@ -112,7 +113,7 @@ def main():
     else:
         modeltype = modeltypes[0]
 
-    model = modeltype[0](len(species_list),*(modeltype[3:]))
+    model = modeltype[0](len(species_list) + 1,*(modeltype[3:]))#+ 1 for not on species list
     image_corrector = modeltype[1](modeltype[3])
     batch_size = modeltype[2]
     augments = traintype[0]

@@ -20,18 +20,24 @@ class TreeSpeciesDataset(torch.utils.data.Dataset):
         for i in range(len(species_list)):
             self.species_dict[species_list[i]] = i
             self.distrib.append(0)
+        #for other species
+        self.species_dict["_"] = len(species_list)
+        self.distrib.append(0)
         #get and store image id pairs
         self.records = []
         for file in os.listdir(tree_dir):
             if file[-4:] == ".xml":
                 species = getContent(self.tree_dir,file)[1]
-                if binSearch(species,species_list):#seems to be a valid xml file, a valid species tag was found
+                if species:#seems to be a valid xml file, a valid species tag was found
+                    if not binSearch(species,species_list):
+                        species = "_"
                     if os.path.isfile(os.path.join(self.tree_dir,file[:-4] + ".png")):
                         self.records.append((file[:-4] + ".png",self.species_dict[species]))
                         self.distrib[self.species_dict[species]] += 1
                     elif os.path.isfile(os.path.join(self.tree_dir,file[:-4] + ".jpg")):
                         self.records.append((file[:-4] + ".jpg",self.species_dict[species]))
                         self.distrib[self.species_dict[species]] += 1
+                
         
     def __len__(self):
         return len(self.records)
@@ -198,22 +204,22 @@ class Resnet_block(torch.nn.Module):
 
 class Resnet_bottle_block(torch.nn.Module):
     def __init__(self,channels_in,channels,reduction,stride = 1):
-        super(Resnet_block,self).__init__()
+        super(Resnet_bottle_block,self).__init__()
         self.stride = stride
         #the residual block
         block_layers = [        
-            torch.nn.Conv2d(channels_in,channels_in/reduction,1,1,1,padding_mode='zeros', bias=False),
-            torch.nn.BatchNorm2d(channels_in/reduction),
+            torch.nn.Conv2d(channels_in,channels_in//reduction,1,1,0,padding_mode='zeros', bias=False),
+            torch.nn.BatchNorm2d(channels_in//reduction),
             torch.nn.ReLU()
         ]
         if stride == 1:
-            torch.nn.Conv2d(channels_in/reduction,channels/reduction,3,1,1,padding_mode='zeros', bias=False)
+            torch.nn.Conv2d(channels_in//reduction,channels//reduction,3,1,1,padding_mode='zeros', bias=False)
         else:
-            block_layers.append(torch.nn.Conv2d(channels_in/reduction,channels/reduction,3,stride,0,padding_mode='zeros', bias=False))
+            block_layers.append(torch.nn.Conv2d(channels_in//reduction,channels//reduction,3,stride,0,padding_mode='zeros', bias=False))
         block_layers.extend([
-            torch.nn.BatchNorm2d(channels/reduction),
+            torch.nn.BatchNorm2d(channels//reduction),
             torch.nn.ReLU(),
-            torch.nn.Conv2d(channels/reduction,channels,1,1,1,padding_mode='zeros', bias=False),
+            torch.nn.Conv2d(channels//reduction,channels,1,1,0,padding_mode='zeros', bias=False),
             torch.nn.BatchNorm2d(channels)
         ])
         self.main = torch.nn.Sequential(*block_layers)
@@ -223,7 +229,7 @@ class Resnet_bottle_block(torch.nn.Module):
 
     def forward(self,inp):
         x = self.main(inp if self.stride == 1 else evenPad(inp))
-        x += inp if self.stride == 1 else self.resid(inp)#self.resid(inp) #apply residual
+        x += inp if self.stride == 1 else self.resid(oddCrop(inp))#self.resid(inp) #apply residual
         x = self.norm(x)
         x = self.relu(x) #the missing activation from the residual block
         return x
@@ -316,29 +322,31 @@ class ProgressMade:
             self.since_improve += 1
             return False
 
-# if __name__ == "__main__":
-#     main()
-    # with open(os.path.abspath(os.path.join("dataset_filter","listCommonSpecies.txt"))) as f:
-    #     species_list = [line.replace('\r', '') for line in f.read().splitlines()] #if windows file make good for linux
+if __name__ == "__main__":
+    with open(os.path.abspath(os.path.join("dataset_filter","listCherrySpecies.txt"))) as f:
+        species_list = [line.replace('\r', '') for line in f.read().splitlines()] #if windows file make good for linux
 
-    # dat = TreeSpeciesDataset(os.path.abspath(os.path.join("..","trees")),species_list,ImageRescale(512))
-    # max_width = 0
-    # max_height = 0
-    # min_width = 10000
-    # min_height = 10000
-    # species_dist = dict()
-    # for i in range(len(species_list)):
-    #     species_dist[i] = 0
-    # for i in range(len(dat)):
-    #     img,lab = dat[i]
-    #     size = img.size()
-    #     max_width = max(max_width,size[2])
-    #     max_height = max(max_height,size[1])
-    #     min_width = min(min_width,size[2])
-    #     min_height = min(min_height,size[1])
-    #     species_dist[lab] += 1
-    # print((max_width,max_height))
-    # print((min_width,min_height))
-    # print((min(species_dist.values()),max(species_dist.values())))
-    # for key, value in species_dist.items():
-    #     print((species_list[key],value))
+    dat = TreeSpeciesDataset(os.path.abspath(os.path.join("..","trees")),species_list,ImageRescale(512))
+    max_width = 0
+    max_height = 0
+    min_width = 10000
+    min_height = 10000
+    species_dist = dict()
+    for i in range(len(species_list) + 1):
+        species_dist[i] = 0
+    for i in range(len(dat)):
+        img,lab = dat[i]
+        size = img.size()
+        max_width = max(max_width,size[2])
+        max_height = max(max_height,size[1])
+        min_width = min(min_width,size[2])
+        min_height = min(min_height,size[1])
+        species_dist[lab] += 1
+    print((max_width,max_height))
+    print((min_width,min_height))
+    print((min(species_dist.values()),max(species_dist.values())))
+    for key, value in species_dist.items():
+        if key < len(species_list):
+            print((species_list[key],value))
+        else:
+            print("_",value)
