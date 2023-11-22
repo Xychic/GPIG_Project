@@ -29,6 +29,9 @@ class SensorData:
         #ADD more field checks if needed
 
 
+    def toTupleForDataBase(self):
+        data=(self.co2_level,self.ozone_level,self.temperature,self.co_level,self.so2_level,self,self.no2_level,self.soil_moisture_level,self.soil_temperature_level,self.soil_humidity_level,self.soil_ph,self.date,self.anomalous)
+        return data
     def _phValidate(self):
         if (self.soil_ph<0) or (self.soil_ph>14):
             raise ValueError(F"Invalid Ph{self.soil_ph}. 0<=ph<=14")
