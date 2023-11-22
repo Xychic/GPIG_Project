@@ -16,7 +16,7 @@ class PrioritizedItem:
     
 
 
-def AStar(StartNode:Node,GoalNode:Node,graph:Map,Heuristic:Callable[[Node,Node],float]=distanceBetweenNodes)->list[Node]:
+def AStar(StartNode:Node,GoalNode:Node,graph:Map,Heuristic:Callable[[Node,Node],float]=distanceBetweenNodes)->tuple[float, list[Node]]:
 
     def reconstruct_path(current:Node)->list[Node]:
         route: list[Node]=[current]
@@ -48,7 +48,7 @@ def AStar(StartNode:Node,GoalNode:Node,graph:Map,Heuristic:Callable[[Node,Node],
         current_node:Node = unexplored_nodes.get().item
         if current_node == GoalNode:
             
-            return reconstruct_path(current_node)
+            return (cost_to_node[GoalNode], reconstruct_path(current_node))
         explored_nodes.add(current_node)
         for node in current_node.getNeighbours():
             neighbour:Node = graph.get_node(node).unwrap()

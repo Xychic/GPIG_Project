@@ -5,12 +5,12 @@ use cpython::{FromPyObject, ObjectProtocol, PyObject, PyResult, Python};
 #[derive(Debug, PartialEq, Clone)]
 pub struct Node {
     pub id: String,
-    pub lat: f64,
-    pub lon: f64,
+    pub lat: f32,
+    pub lon: f32,
 }
 
 impl Node {
-    pub fn dist(&self, other: &Node) -> f64 {
+    pub fn _dist(&self, other: &Node) -> f32 {
         (self.lat - other.lat).abs() + (self.lon - other.lon).abs()
     }
 }
@@ -18,8 +18,8 @@ impl Node {
 impl Hash for Node {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.id.hash(state);
-        ((self.lat * 1E6) as isize).hash(state);
-        ((self.lon * 1E6) as isize).hash(state);
+        self.lat.to_bits().hash(state);
+        self.lon.to_bits().hash(state);
     }
 }
 

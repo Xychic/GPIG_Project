@@ -9,7 +9,7 @@ pub struct NodeEdge {
     pub id: String,
     pub node_a: Node,
     pub node_b: Node,
-    pub weight: f64,
+    pub weight: f32,
 }
 
 impl Eq for NodeEdge {}
@@ -19,12 +19,12 @@ impl Hash for NodeEdge {
         self.id.hash(state);
         self.node_a.hash(state);
         self.node_b.hash(state);
-        ((self.weight * 1E6) as isize).hash(state);
+        self.weight.to_bits().hash(state);
     }
 }
 
 impl NodeEdge {
-    pub fn from_py_dict(py: Python, edge_dict: PyObject) -> HashSet<NodeEdge> {
+    pub fn from_py_dict(py: Python, edge_dict: &PyObject) -> HashSet<NodeEdge> {
         let mut data = HashSet::new();
         let edge_dict: PyDict = edge_dict.extract(py).unwrap();
         for (_, v) in edge_dict.items(py) {

@@ -1,8 +1,5 @@
 import math
-from multiprocessing.util import is_abstract_socket_namespace
-import sys
 import IdDictionary
-from Option import Some
 from node import Node, NodeEdge , distanceBetweenNodes
 from AStar import AStar
 import Map
@@ -73,10 +70,10 @@ py_end = "222:430"
 print(start, end)
 
 timer = time()
-path = set(AStar(tree_map.get_node(start).unwrap(), tree_map.get_node(py_end).unwrap(), tree_map, lambda a, b: abs(a.lat - b.lat) + abs(a.lon - b.lon)))
+(cost, path) = AStar(tree_map.get_node(start).unwrap(), tree_map.get_node(py_end).unwrap(), tree_map, lambda a, b: abs(a.lat - b.lat) + abs(a.lon - b.lon))
 print(f"Completed in {time() - timer:,}s")
 # show_path(tree_map, [p.id for p in path])
-print(len(path))
+print(cost, len(path))
 
 
 def heuristic(a: tuple[float, float], b: tuple[float, float]) -> int:
@@ -100,14 +97,14 @@ def heuristic_b(a: tuple[float, float], b: tuple[float, float]) -> int:
     return int(result)
 
 timer = time()
-rust_path = node_lookup.get_path(tree_map.edges, start, py_end, heuristic)
+(cost, rust_path) = node_lookup.get_path(tree_map.edges, start, py_end, heuristic)
 print(f"Completed in {time() - timer:,}s")
-print(len(rust_path))
+print(cost, len(rust_path))
 
 timer = time()
-rust_path = node_lookup.get_path(tree_map.edges, start, end, heuristic)
+(cost, rust_path) = node_lookup.get_path(tree_map.edges, start, end, heuristic)
 print(f"Completed in {time() - timer:,}s")
-print(len(rust_path))
+print(cost, len(rust_path))
 # show_path(tree_map, rust_path)
 #Distance Calculation
 centralHallNode = Node("Central Hall",53.94703,-1.05284)
