@@ -3,6 +3,8 @@ from typing import Callable
 from uuid import uuid4
 from Option import Null, Option, Some
 import math
+
+
 @dataclass
 class NodeEdge:
     """
@@ -11,11 +13,11 @@ class NodeEdge:
     Raises:
         ValueError: If a negative weight is give
     """
+
     id: str
     node_a: "Node"
     node_b: "Node"
     weight: float
-
 
     def __post_init__(self):
         if not 0 <= self.weight:
@@ -23,6 +25,7 @@ class NodeEdge:
 
     def __repr__(self) -> str:
         return f"{self.node_a.id}<-{self.weight}->{self.node_b.id}"
+
 
 @dataclass
 class Node:
@@ -39,47 +42,54 @@ class Node:
 
     def __repr__(self) -> str:
         return f"Node({self.id}@({self.lat},{self.lon}))"
-    def getNeighbours(self)->set[str]:
+
+    def getNeighbours(self) -> set[str]:
         return self._neighbour_ids
-    def addNeighbours(self,id:str):
+
+    def addNeighbours(self, id: str):
         self._neighbour_ids.add(id)
-    def removeNeighbour(self,id:str):
+
+    def removeNeighbour(self, id: str):
         self._neighbour_ids.remove(id)
+
     def __hash__(self) -> int:
-        return hash((self.id,self.lat,self.lon))
-    
-def distanceBetweenNodes(nodeA:Node,nodeB:Node)-> float:
-    """Returns the distance in M between 
+        return hash((self.id, self.lat, self.lon))
+
+
+def distanceBetweenNodes(nodeA: Node, nodeB: Node) -> float:
+    """Returns the distance in M between
     two nodes calculated from their latitudes
     and longitudes using the haversine formula"""
-    #Convert to radians
-    Alat:float = math.radians(nodeA.lat)
-    Alon:float = math.radians(nodeA.lon)
-    Blat:float = math.radians(nodeB.lat)
-    Blon:float = math.radians(nodeB.lon)
-    latitudeDelta:float = Alat - Blat
-    longitudeDelta:float = Alon - Blon
-    a:float = math.sin(latitudeDelta/2)**2 + math.cos(Alat)*math.cos(Blat) * math.sin(longitudeDelta/2)**2
-    c:float = 2* math.asin(math.sqrt(a))
-    EarthRadius:float = 6371000
-    result:float = EarthRadius * c
+    # Convert to radians
+    Alat: float = math.radians(nodeA.lat)
+    Alon: float = math.radians(nodeA.lon)
+    Blat: float = math.radians(nodeB.lat)
+    Blon: float = math.radians(nodeB.lon)
+    latitudeDelta: float = Alat - Blat
+    longitudeDelta: float = Alon - Blon
+    a: float = (
+        math.sin(latitudeDelta / 2) ** 2
+        + math.cos(Alat) * math.cos(Blat) * math.sin(longitudeDelta / 2) ** 2
+    )
+    c: float = 2 * math.asin(math.sqrt(a))
+    EarthRadius: float = 6371000
+    result: float = EarthRadius * c
     return result
-
 
 
 @dataclass
 class Species:
     name: str
-    species_data: str #placeholder
+    species_data: str  # placeholder
+
 
 @dataclass
 class Plants:
     species: Species
 
 
-
 class Map:
-    def __init__(self, id_gen: Callable[[], str]=lambda: str(uuid4())) -> None:
+    def __init__(self, id_gen: Callable[[], str] = lambda: str(uuid4())) -> None:
         self.id_generator: Callable[[], str] = id_gen
         self.nodes: dict[str, Node] = {}
         self.edges: dict[str, NodeEdge] = {}
@@ -100,7 +110,11 @@ class Map:
         return Null
 
     def remove_node(self, node_id: str) -> None:
-        to_remove = [edge.id for edge in self.edges.values() if edge.node_a.id == node_id or edge.node_b.id == node_id]
+        to_remove = [
+            edge.id
+            for edge in self.edges.values()
+            if edge.node_a.id == node_id or edge.node_b.id == node_id
+        ]
         for edge_id in to_remove:
             self.remove_edge(edge_id)
         del self.nodes[node_id]
@@ -109,13 +123,13 @@ class Map:
     def add_edge(self, id_a: str, id_b: str, weight: float) -> None:
         if self.get_edge(id_a, id_b).is_some():
             raise Exception("Edge exists")
-            # TODO Either update edge, do nothing, 
+            # TODO Either update edge, do nothing,
 
         match (self.get_node(id_a), self.get_node(id_b)):
             case (Some(a), Some(b)):
                 edge_id = self.id_generator()
                 self.edges[edge_id] = NodeEdge(edge_id, a, b, weight)
-                #Update the neighbours of the nodes
+                # Update the neighbours of the nodes
                 a.addNeighbours(id_b)
                 b.addNeighbours(id_a)
             case _:
@@ -129,16 +143,14 @@ class Map:
                 return Some(edge)
         return Null
 
-    def get_node_neighbours(self,node_id:str)-> Option[list[str]]:
-        """Returns a list of Ids of nodes that are connected to node_id
-        """
+    def get_node_neighbours(self, node_id: str) -> Option[list[str]]:
+        """Returns a list of Ids of nodes that are connected to node_id"""
         if node_id in self.nodes.keys():
             match self.get_node(node_id):
                 case Some(node):
-                    
                     return Some(sorted(node.getNeighbours()))
                 case _:
-                    #error handling
+                    # error handling
 
                     return Null
         else:
@@ -158,14 +170,15 @@ class Map:
             case _:
                 # Error Handling
                 pass
-    def getID(self,node:Node)-> str:
-            for k in self.nodes:
-                if self.nodes[k] == node:
-                    return k
-            raise LookupError
+
+    def getID(self, node: Node) -> str:
+        for k in self.nodes:
+            if self.nodes[k] == node:
+                return k
+        raise LookupError
 
     def remove_edge(self, edge_id: str) -> None:
-        edge:NodeEdge =self.edges[edge_id]
+        edge: NodeEdge = self.edges[edge_id]
         edge.node_a.removeNeighbour(self.getID(edge.node_b))
         edge.node_b.removeNeighbour(self.getID(edge.node_a))
         del self.edges[edge_id]

@@ -3,6 +3,7 @@ from typing import Any, Generic, Literal, NoReturn, TypeVar
 
 T = TypeVar("T")
 
+
 @dataclass(frozen=True)
 class Some(Generic[T]):
     _value: T
@@ -31,6 +32,7 @@ class Some(Generic[T]):
     def unwrap_or(self, default: T) -> T:
         return self._value
 
+
 @dataclass
 class NullClass:
     def __eq__(self, other: Any) -> bool:
@@ -53,6 +55,7 @@ class NullClass:
 
     def unwrap_or(self, default: T) -> T:
         return default
+
 
 Null = NullClass()
 Option = Some[T] | NullClass

@@ -17,11 +17,7 @@ fn as_str(py: Python, edge_dict: &PyObject) -> PyResult<String> {
     Ok(format!("{edges:?}"))
 }
 
-#[allow(
-    clippy::unnecessary_wraps,
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss
-)]
+#[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
 fn get_path(
     py: Python,
     edge_dict: &PyObject,
@@ -29,14 +25,13 @@ fn get_path(
     end: &PyObject,
     heuristic_fn: &PyObject,
 ) -> PyResult<(f32, Vec<String>)> {
-    // let edges: HashSet<NodeEdge> = NodeEdge::from_py_dict(py, edge_dict);
     let map = Map::from_py_dict(py, edge_dict);
     let start: String = start.extract(py).unwrap();
     let end: String = end.extract(py).unwrap();
     let map_size = map.node_count();
-    let heuristic: &dyn Fn((f32, f32), (f32, f32)) -> f32 = &|x, y| {
+    let heuristic: &dyn Fn((f32, f32), (f32, f32)) -> f32 = &|(a_lat, a_lon), (b_lat, b_lon)| {
         heuristic_fn
-            .call(py, (x, y), None)
+            .call(py, ((a_lat, a_lon), (b_lat, b_lon)), None)
             .unwrap()
             .extract(py)
             .unwrap()
