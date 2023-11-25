@@ -18,7 +18,7 @@ try:
 except:
     print("Database not connected successfully")
     exit()
-def getSchema():
+def getSchema()->None:
 	query:str = """
 			SELECT table_name, column_name, data_type
 			FROM information_schema.columns
