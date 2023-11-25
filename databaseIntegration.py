@@ -30,6 +30,16 @@ def example_read():
             dict = row._asdict()
             x = sites.site(dict["id"],dict["site_name"])
             print(x)
+def readTable(tablename:str,limit:int=100):
+    your_table:Table = Table(tablename, metadata, autoload=True, autoload_with=engine)
+
+    with engine.connect() as connection:
+        # Example query
+        query = your_table.select().limit(10)  # Select the first 10 rows from the table
+        result = connection.execute(query)
+        for row in result:
+            print(row)
+
 def example_write():
     with engine.connect() as connection:
         query = insert(your_table).values(site_name="test")
