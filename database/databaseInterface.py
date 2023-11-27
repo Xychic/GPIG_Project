@@ -1,6 +1,6 @@
 import psycopg2
 from datetime import datetime
-import sensordata
+
 DB_USER ="postgres"
 DB_PASS = "example"
 DB_HOST = "localhost"
@@ -18,6 +18,9 @@ try:
 except:
     print("Database not connected successfully")
     exit()
+
+exit()
+
 def getSchema()->None:
 	query:str = """
 			SELECT table_name, column_name, data_type
@@ -54,7 +57,7 @@ def writeSensorData(sensorData:sensordata.SensorData):
 		VALUES (%s, %s,%s,%s,%s,%s,%s, %s,%s,%s,%s,%s,%s);
 		"""
 		#data=(sensorData.co2_level,sensorData.ozone_level,sensorData.temperature,sensorData.co_level,sensorData.so2_level,sensorData,sensorData.no2_level,sensorData.soil_moisture_level,sensorData.soil_temperature_level,sensorData.soil_humidity_level,sensorData.soil_ph,sensorData.date,sensorData.anomalous)
-		data = sensorData.toTupleForDataBase();
+		data = sensorData.to_tuple();
 		try:
 			curs.execute(insert_query,data)
 		except (Exception, psycopg2.DatabaseError) as error:

@@ -1,7 +1,5 @@
-import sqlalchemy
+from sqlalchemy import create_engine, MetaData, Table , insert
 
-from sqlalchemy import create_engine, MetaData, Table , insert, text
-import sites
 # Replace 'username', 'password', 'host', 'port', and 'database_name' with your PostgreSQL credentials
 DATABASE_URL = 'postgresql://postgres:example@localhost:5432/postgres'
 
