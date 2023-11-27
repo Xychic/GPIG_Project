@@ -1,13 +1,16 @@
 import math
 import IdDictionary
-from node import Node, NodeEdge, distanceBetweenNodes
+from objects.node import Node, NodeEdge, distanceBetweenNodes, Lat, Lon
+
+from Option import Some
 from AStar import AStar
 import Map
+
+# import PrintColours
 
 from time import time
 
 import NodeLookup
-from node import Lat, Lon
 
 # A node can be made up of any type as we simply use its ID as a reference
 # A edge is simply a tuple of 3 things (NodeA, NodeB, Weight) it is bi-directional
