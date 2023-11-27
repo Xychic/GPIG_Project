@@ -208,6 +208,10 @@ ALTER TABLE ONLY public.species
     ADD CONSTRAINT species_pk PRIMARY KEY (id);
 
 
+ALTER TABLE public.node_to_data_links
+    ADD CONSTRAINT node_to_data_links_pk PRIMARY KEY (node_id,data_id);
+
+
 --
 -- TOC entry 3272 (class 2606 OID 16427)
 -- Name: node_to_node_links node_links_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
