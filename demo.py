@@ -1,5 +1,5 @@
 import IdDictionary
-from node import Map, Node, NodeEdge , distanceBetweenNodes
+from objects.node import Map, Node, NodeEdge , distanceBetweenNodes
 from AStar import AStar
 # A node can be made up of any type as we simply use its ID as a reference
 # A edge is simply a tuple of 3 things (NodeA, NodeB, Weight) it is bi-directional

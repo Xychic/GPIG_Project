@@ -26,6 +26,8 @@ class NodeEdge:
 
 @dataclass
 class Node:
+    # TODO why is id a string? Also can we rename from id to something else, clashes with built-in python id
+    # TODO need to add site_id here but I don't want to do it incase it breaks something
     id: str
     lat: float
     lon: float
