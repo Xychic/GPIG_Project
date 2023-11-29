@@ -16,7 +16,7 @@ identityer = optimFactory(torch.nn.Identity)
 traintypes = [#augmentation,optimizer,scheduler,weighted,epoch,limit,accuracy
     [torch.nn.Identity(),resnet_base_SGD,None,False,10,lambda loss,accu: False,True],
     [classifier.non_dist_augments,resnet_base_SGD,lr_plataeau,True,100,classifier.ProgressMade(15,classifier.CoolRate(15,15)),True],
-    [classifier.non_dist_augments,defaultAdamOptim,None,True,100,classifier.ProgressMade(15,classifier.CoolRate(15,15)),False],
+    [classifier.non_dist_augments,defaultAdamOptim,None,True,100,classifier.ProgressMade(15,classifier.CoolRate(15,15)),True],
     [torch.nn.Identity(),defaultAdamOptim,None,False,1,lambda loss,accu: False,False]
 ]
 #variables dictating the model
@@ -81,17 +81,17 @@ def interTrain(model,optim,scheduler,data,augment,losser,epochs,limit,testing_da
     return (all_loss, all_accu) if testing_data else all_loss
 
 def main():
-    sys.argv = ["training.py",os.path.join("..","trees"),os.path.join("dataset_filter","listCommonSpecies.txt"),"1","3",os.path.join("classifier","test1.pt")]
-    if len(sys.argv) < 4 or len(sys.argv) > 7:
-        print("training.py inputdir speciesListFile traintype [modeltype [modelfilesave [modelfileload]]]]")
+    #sys.argv = ["training.py",",".join([os.path.join("..","trees"),os.path.join("..","trees_common")]),os.path.join("dataset_filter","listCommonestBritishSpecies.txt"),"False","2","2"]#,os.path.join("classifier","resnet50test1.pt")]
+    if len(sys.argv) < 5 or len(sys.argv) > 8:
+        print("training.py inputdir[,additional_input_dir[,...]] speciesListFile include_others traintype [modeltype [modelfilesave [modelfileload]]]]")
         sys.exit()
-    inp = os.path.abspath(sys.argv[1])
+    inps = os.path.abspath(sys.argv[1]).split(",")
     speciesListFile = os.path.abspath(sys.argv[2])
-
-    if not os.path.isdir(inp):
-        raise OSError("Invalid input directory: " + inp)
-    elif not os.access(inp,os.R_OK):
-        raise OSError("No read permission for input directory: " + inp)
+    for inp in inps:
+        if not os.path.isdir(inp):
+            raise OSError("Invalid input directory: " + inp)
+        elif not os.access(inp,os.R_OK):
+            raise OSError("No read permission for input directory: " + inp)
     if not os.path.isfile(speciesListFile):
         raise OSError("Invalid output directory: " + speciesListFile)
     elif not os.access(speciesListFile,os.W_OK):
@@ -99,21 +99,25 @@ def main():
     with open(speciesListFile) as f:
         species_list = [line.replace('\r', '') for line in f.read().splitlines()]#if windows file this will remove the \rs
 
+    if sys.argv[3] != "True" and sys.argv[3] != "False":
+        raise ValueError("include_others must be 'True' or 'False', got: " + sys.argv[3])
+    include_others = (sys.argv[3] == "True")
+
     try:
-        traintypeindex = int(sys.argv[3])
+        traintypeindex = int(sys.argv[4])
         traintype = traintypes[traintypeindex]
     except:
-        raise ValueError("Invalid train type: " + sys.argv[3])
-    if len(sys.argv) >= 5:
+        raise ValueError("Invalid train type: " + sys.argv[4])
+    if len(sys.argv) >= 6:
         try:
-            modeltypeindex = int(sys.argv[4])
+            modeltypeindex = int(sys.argv[5])
             modeltype = modeltypes[modeltypeindex]
         except:
-            raise ValueError("Invalid model type: " + sys.argv[4])
+            raise ValueError("Invalid model type: " + sys.argv[5])
     else:
         modeltype = modeltypes[0]
 
-    model = modeltype[0](len(species_list) + 1,*(modeltype[3:]))#+ 1 for not on species list
+    model = modeltype[0](len(species_list) + (1 if include_others else 0),*(modeltype[3:]))#+ 1 for not on species list
     image_corrector = modeltype[1](modeltype[3])
     batch_size = modeltype[2]
     augments = traintype[0]
@@ -127,20 +131,20 @@ def main():
     limit = traintype[5]
     accuracy = traintype[6]
     
-    if len(sys.argv) >= 6:
-        modelfile_save = os.path.abspath(sys.argv[5])
+    if len(sys.argv) >= 7:
+        modelfile_save = os.path.abspath(sys.argv[6])
         save_dir = os.path.dirname(modelfile_save)
         if not os.access(save_dir, os.W_OK):
             raise OSError("Invalid model file save location: " + modelfile_save)
-        if len(sys.argv) >= 7:
-            modelfile_load = os.path.abspath(sys.argv[6])
+        if len(sys.argv) >= 8:
+            modelfile_load = os.path.abspath(sys.argv[7])
             if not os.path.isfile(modelfile_load):
                 raise OSError("Invalid model file: " + modelfile_load)
             elif not os.access(modelfile_load,os.R_OK):
                 raise OSError("No read permission for model file: " + modelfile_load)
             model.load_state_dict(torch.load(modelfile_load))
     #load dataset
-    dataset = classifier.TreeSpeciesDataset(inp,species_list,image_corrector)
+    dataset = classifier.TreeSpeciesDataset(inps,species_list,image_corrector,others=include_others)
     test_amount = len(dataset)//5
     train_dataset, test_dataset = classifier.safe_train_test_split(dataset,test_amount)
     print("Training on " + str(len(train_dataset)) + " images, Testing on " + str(len(test_dataset)) + " images")
@@ -159,7 +163,7 @@ def main():
         losses = interTrain(model,optim,scheduler,train_data,augments,losser,epoch,limit,None)
     print("Accuracy: " + str(CalcAccu(model,test_data)*100) + "%")
     #save_model
-    if len(sys.argv) >= 6:
+    if len(sys.argv) >= 7:
         torch.save(model.state_dict(), modelfile_save)
         #save results
         name = os.path.basename(modelfile_save).split(".")[0]

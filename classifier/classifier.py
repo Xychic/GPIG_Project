@@ -10,8 +10,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 from dataset_filter.dataset_filter import getContent, binSearch
 
 class TreeSpeciesDataset(torch.utils.data.Dataset):
-    def __init__(self, tree_dir, species_list, transform=None, target_transform=None):
-        self.tree_dir = tree_dir
+    def __init__(self, tree_dirs, species_list, transform=None, target_transform=None, others=True):
+        self.tree_dirs = tree_dirs
         self.transform = transform
         self.target_transform = target_transform
         #create species to id map
@@ -21,22 +21,28 @@ class TreeSpeciesDataset(torch.utils.data.Dataset):
             self.species_dict[species_list[i]] = i
             self.distrib.append(0)
         #for other species
-        self.species_dict["_"] = len(species_list)
-        self.distrib.append(0)
+        if others:
+            self.species_dict["_"] = len(species_list)
+            self.distrib.append(0)
         #get and store image id pairs
         self.records = []
-        for file in os.listdir(tree_dir):
-            if file[-4:] == ".xml":
-                species = getContent(self.tree_dir,file)[1]
-                if species:#seems to be a valid xml file, a valid species tag was found
-                    if not binSearch(species,species_list):
-                        species = "_"
-                    if os.path.isfile(os.path.join(self.tree_dir,file[:-4] + ".png")):
-                        self.records.append((file[:-4] + ".png",self.species_dict[species]))
-                        self.distrib[self.species_dict[species]] += 1
-                    elif os.path.isfile(os.path.join(self.tree_dir,file[:-4] + ".jpg")):
-                        self.records.append((file[:-4] + ".jpg",self.species_dict[species]))
-                        self.distrib[self.species_dict[species]] += 1
+        for i in range(len(tree_dirs)):
+            tree_dir = tree_dirs[i]
+            for file in os.listdir(tree_dir):
+                if file[-4:] == ".xml":
+                    species = getContent(tree_dir,file)[1]
+                    if species:#seems to be a valid xml file, a valid species tag was found
+                        if not binSearch(species,species_list):
+                            if others:
+                                species = "_"
+                            else:
+                                continue
+                        if os.path.isfile(os.path.join(tree_dir,file[:-4] + ".png")):
+                            self.records.append((i,file[:-4] + ".png",self.species_dict[species]))
+                            self.distrib[self.species_dict[species]] += 1
+                        elif os.path.isfile(os.path.join(tree_dir,file[:-4] + ".jpg")):
+                            self.records.append((i,file[:-4] + ".jpg",self.species_dict[species]))
+                            self.distrib[self.species_dict[species]] += 1
                 
         
     def __len__(self):
@@ -44,9 +50,9 @@ class TreeSpeciesDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         record = self.records[idx]
-        img_path = os.path.join(self.tree_dir, record[0])
+        img_path = os.path.join(self.tree_dirs[record[0]], record[1])
         image = read_image(img_path)/255. #convert from 0-255 to 0.0-1.0
-        label = record[1]
+        label = record[2]
         if self.transform:
             image = self.transform(image)
         if self.target_transform:
@@ -56,7 +62,7 @@ class TreeSpeciesDataset(torch.utils.data.Dataset):
 def safe_train_test_split(dataset,test_size): #"adapted" from eric's answer on https://stackoverflow.com/questions/50544730/how-do-i-split-a-custom-dataset-into-training-and-test-datasets
 
     # generate indices: instead of the actual data we pass in integers instead
-    targets = [rec[1] for rec in dataset.records]
+    targets = [rec[2] for rec in dataset.records]
     train_indices, test_indices, _, _ = train_test_split(
         range(len(dataset)),
         targets,
@@ -323,16 +329,16 @@ class ProgressMade:
             return False
 
 if __name__ == "__main__":
-    with open(os.path.abspath(os.path.join("dataset_filter","listCherrySpecies.txt"))) as f:
+    with open(os.path.abspath(os.path.join("dataset_filter","listCommonestBritishSpecies.txt"))) as f:
         species_list = [line.replace('\r', '') for line in f.read().splitlines()] #if windows file make good for linux
 
-    dat = TreeSpeciesDataset(os.path.abspath(os.path.join("..","trees")),species_list,ImageRescale(512))
+    dat = TreeSpeciesDataset([os.path.abspath(os.path.join("..","trees")),os.path.abspath(os.path.join("..","trees_common"))],species_list,ImageRescale(512),others=False)
     max_width = 0
     max_height = 0
     min_width = 10000
     min_height = 10000
     species_dist = dict()
-    for i in range(len(species_list) + 1):
+    for i in range(len(species_list)):
         species_dist[i] = 0
     for i in range(len(dat)):
         img,lab = dat[i]
