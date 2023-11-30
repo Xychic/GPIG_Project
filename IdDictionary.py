@@ -2,9 +2,9 @@ import random
 import string
 from typing import Generic, TypeVar
 
-class IdGenerator:
 
-    def __init__(self, length: int=2, alphabet: str=string.ascii_uppercase):
+class IdGenerator:
+    def __init__(self, length: int = 2, alphabet: str = string.ascii_uppercase):
         self.length: int = length
         self.alphabet: str = alphabet
         self.inUse: set[str] = set()
@@ -12,7 +12,7 @@ class IdGenerator:
     def gen_id(self):
         new_id = "".join(random.choice(self.alphabet) for _ in range(self.length))
         while new_id in self.inUse:
-             new_id = "".join(random.choice(self.alphabet) for _ in range(self.length))
+            new_id = "".join(random.choice(self.alphabet) for _ in range(self.length))
         self.inUse.add(new_id)
         return new_id
 
@@ -25,7 +25,10 @@ class IdGenerator:
     def get_used_ids(self):
         return list(self.inUse)
 
+
 T = TypeVar("T")
+
+
 class IdDict(Generic[T]):
 
     """
@@ -34,12 +37,11 @@ class IdDict(Generic[T]):
     Must make use of the IdGenerator if more than one is used.
     """
 
-    def __init__(self, uniqueId: str="") -> None:
+    def __init__(self, uniqueId: str = "") -> None:
         self._data: dict[str, T] = {}
         self._counter: int = 0
         # Used to differentiate the ids when multiple instances of this class exist.
         self.uniqueId: str = uniqueId
-
 
     def add(self, object: T) -> str:
         id = self.uniqueId + "_" + str(self._counter)
@@ -54,13 +56,7 @@ class IdDict(Generic[T]):
         return result
 
     def get_id(self, object: T) -> str:
-        result = next(
-            (
-                k
-                for (k, v) in self._data.items()
-                if v == object
-            ), None
-        )
+        result = next((k for (k, v) in self._data.items() if v == object), None)
         if result is None:
             raise Exception(f"Invalid object: {object}")
         return result

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use cpython::{PyDict, PyObject, Python};
 
-use super::{edge::NodeEdge, node::Node};
+use super::{node::Node, node_edge::NodeEdge, wrapped_float::WrappedFloat};
 
 #[derive(Debug)]
 pub struct Map {
@@ -12,7 +12,7 @@ pub struct Map {
 }
 
 impl Map {
-    pub fn from_py_dict(py: Python, edge_dict: PyObject) -> Map {
+    pub fn from_py_dict(py: Python, edge_dict: &PyObject) -> Map {
         let mut connections = HashMap::new();
         let mut edges = HashMap::new();
         let mut nodes = HashMap::new();
@@ -38,17 +38,17 @@ impl Map {
         }
     }
 
-    pub fn get_weight(&self, node_a_id: &str, node_b_id: &str) -> Option<f64> {
-        for edge_id in self.connections.get(node_a_id)? {
+    pub fn _get_weight(&self, id_a: &str, id_b: &str) -> Option<WrappedFloat> {
+        for edge_id in self.connections.get(id_a)? {
             let edge = self.edges.get(edge_id)?;
-            if edge.node_a.id == node_b_id || edge.node_b.id == node_b_id {
+            if edge.node_a.id == id_b || edge.node_b.id == id_b {
                 return Some(edge.weight);
             }
         }
         None
     }
 
-    pub fn get_connections(&self, node_id: &str) -> Option<Vec<(String, f64)>> {
+    pub fn get_connections(&self, node_id: &str) -> Option<Vec<(String, WrappedFloat)>> {
         Some(
             self.connections
                 .get(node_id)?

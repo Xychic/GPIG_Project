@@ -2,6 +2,7 @@ from typing import Any, Generic, Literal, NoReturn, TypeVar, TypeAlias
 
 T = TypeVar("T")
 
+
 class Ok(Generic[T]):
     def __init__(self, value: T) -> None:
         self._value: T = value
@@ -32,6 +33,8 @@ class Ok(Generic[T]):
 
 
 E = TypeVar("E")
+
+
 class Err(Generic[E]):
     def __init__(self, value: E) -> None:
         self._value: E = value
@@ -55,9 +58,12 @@ class Err(Generic[E]):
         return f"Err({self._value})"
 
     def unwrap(self) -> NoReturn:
-        raise Exception(f"Unwrap error: called unwrap on `Err` with value: {self._value}")
+        raise Exception(
+            f"Unwrap error: called unwrap on `Err` with value: {self._value}"
+        )
 
     def unwrap_or(self, default: T) -> T:
         return default
+
 
 Result: TypeAlias = Ok[T] | Err[E]
