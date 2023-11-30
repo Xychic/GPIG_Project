@@ -1,0 +1,1 @@
+panel serve ui_entrypoint.py --autoreload --show --port 8600
