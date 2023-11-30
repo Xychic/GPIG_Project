@@ -43,7 +43,9 @@ for edge_id in edgeDict.get_ids():
 data = open("maze-32-32-4.map").read()
 data = open("orz900d.map").read()
 
-tree_map = Map.from_map("\n".join(data.splitlines()[4:]))
+timer = time()
+tree_map = Map.from_map("\n".join(data.splitlines()[4:]), diagonals=True)
+print(f"Map parsed in {time() - timer:,}s")
 print(len(tree_map.edges))
 
 

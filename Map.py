@@ -112,7 +112,7 @@ class Map:
         # TODO Silent errors
 
 
-def from_map(map: str) -> Map:
+def from_map(map: str, diagonals: bool = False) -> Map:
     result = Map()
     for y, line in enumerate(map.splitlines()):
         result.height = max(result.height, y)
@@ -123,5 +123,9 @@ def from_map(map: str) -> Map:
             result.add_node(Node(f"{x}:{y}", Lat(x), Lon(y)))
             for dx, dy in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]:
                 if result.has_node(f"{dx}:{dy}"):
-                    result.add_edge(f"{x}:{y}", f"{dx}:{dy}", 1)
+                    result.add_edge(f"{x}:{y}", f"{dx}:{dy}", 10)
+            if diagonals:
+                for dx, dy in [(x-1, y-1), (x+1, y+1), (x-1, y+1), (x+1, y-1)]:
+                    if result.has_node(f"{dx}:{dy}"):
+                        result.add_edge(f"{x}:{y}", f"{dx}:{dy}", 14)
     return result
