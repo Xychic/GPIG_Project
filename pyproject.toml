@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "gpig_team_b"
+version = "0.1.0"
+description = ""
+authors = ["GPIG_TeamB"]
+readme = "README.md"
+packages = [{include = "database"}]
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+sqlalchemy = "^2.0.23"
+panel = "^1.3.4"
+pydeck = "^0.8.0"
+python-dotenv = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
