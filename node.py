@@ -6,6 +6,7 @@ import math
 
 ConvertibleToFloat: TypeAlias = str | SupportsFloat | SupportsIndex
 
+
 class Lat(float):
     def __init__(self, val: ConvertibleToFloat):
         super().__init__()
@@ -13,12 +14,14 @@ class Lat(float):
     def __repr__(self) -> str:
         return f"Lat({float(self)})"
 
+
 class Lon(float):
     def __init__(self, val: ConvertibleToFloat):
         super().__init__()
 
     def __repr__(self) -> str:
         return f"Lon({float(self)})"
+
 
 @dataclass
 class NodeEdge:

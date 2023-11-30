@@ -125,7 +125,12 @@ def from_map(map: str, diagonals: bool = False) -> Map:
                 if result.has_node(f"{dx}:{dy}"):
                     result.add_edge(f"{x}:{y}", f"{dx}:{dy}", 10)
             if diagonals:
-                for dx, dy in [(x-1, y-1), (x+1, y+1), (x-1, y+1), (x+1, y-1)]:
+                for dx, dy in [
+                    (x - 1, y + 1),
+                    (x - 1, y - 1),
+                    (x + 1, y + 1),
+                    (x + 1, y - 1),
+                ]:
                     if result.has_node(f"{dx}:{dy}"):
                         result.add_edge(f"{x}:{y}", f"{dx}:{dy}", 14)
     return result

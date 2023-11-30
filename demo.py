@@ -125,4 +125,6 @@ centralHallNode = Node("Central Hall", Lat(53.94703), Lon(-1.05284))
 compSciNode = Node("Dep of Computer Science", Lat(53.94682), Lon(-1.03086))
 
 
-print(f"Distance between{centralHallNode} and {compSciNode} is {distanceBetweenNodes(centralHallNode,compSciNode)}")
+print(
+    f"Distance between{centralHallNode} and {compSciNode} is {distanceBetweenNodes(centralHallNode,compSciNode)}"
+)
