@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use cpython::{PyDict, PyObject, Python};
 
-use super::{node::Node, node_edge::NodeEdge};
+use super::{node::Node, node_edge::NodeEdge, wrapped_float::WrappedFloat};
 
 #[derive(Debug)]
 pub struct Map {
@@ -38,7 +38,7 @@ impl Map {
         }
     }
 
-    pub fn _get_weight(&self, id_a: &str, id_b: &str) -> Option<f32> {
+    pub fn _get_weight(&self, id_a: &str, id_b: &str) -> Option<WrappedFloat> {
         for edge_id in self.connections.get(id_a)? {
             let edge = self.edges.get(edge_id)?;
             if edge.node_a.id == id_b || edge.node_b.id == id_b {
@@ -48,7 +48,7 @@ impl Map {
         None
     }
 
-    pub fn get_connections(&self, node_id: &str) -> Option<Vec<(String, f32)>> {
+    pub fn get_connections(&self, node_id: &str) -> Option<Vec<(String, WrappedFloat)>> {
         Some(
             self.connections
                 .get(node_id)?

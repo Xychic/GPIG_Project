@@ -1,9 +1,24 @@
 from dataclasses import dataclass, field
-from typing import Callable
+from typing import Callable, SupportsFloat, SupportsIndex, TypeAlias
 from uuid import uuid4
 from Option import Null, Option, Some
 import math
 
+ConvertibleToFloat: TypeAlias = str | SupportsFloat | SupportsIndex
+
+class Lat(float):
+    def __init__(self, val: ConvertibleToFloat):
+        super().__init__()
+
+    def __repr__(self) -> str:
+        return f"Lat({float(self)})"
+
+class Lon(float):
+    def __init__(self, val: ConvertibleToFloat):
+        super().__init__()
+
+    def __repr__(self) -> str:
+        return f"Lon({float(self)})"
 
 @dataclass
 class NodeEdge:
@@ -20,7 +35,7 @@ class NodeEdge:
     weight: float
 
     def __post_init__(self):
-        if not 0 <= self.weight:
+        if self.weight <= 0:
             raise ValueError(f"Invalid weight: {self.weight}")
 
     def __repr__(self) -> str:
@@ -30,8 +45,8 @@ class NodeEdge:
 @dataclass
 class Node:
     id: str
-    lat: float
-    lon: float
+    lat: Lat
+    lon: Lon
     _neighbour_ids: set[str] = field(default_factory=set)
 
     # def __post_init__(self):

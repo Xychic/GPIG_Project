@@ -2,7 +2,7 @@ from typing import Callable
 from uuid import uuid4
 from Option import Null, Option, Some
 
-from node import Node, NodeEdge
+from node import Node, NodeEdge, Lat, Lon
 
 
 class Map:
@@ -120,7 +120,7 @@ def from_map(map: str) -> Map:
             result.width = max(result.width, x)
             if char != ".":
                 continue
-            result.add_node(Node(f"{x}:{y}", x, y))
+            result.add_node(Node(f"{x}:{y}", Lat(x), Lon(y)))
             for dx, dy in [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]:
                 if result.has_node(f"{dx}:{dy}"):
                     result.add_edge(f"{x}:{y}", f"{dx}:{dy}", 1)

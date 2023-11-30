@@ -3,13 +3,14 @@ use std::{collections::HashSet, hash::Hash};
 use cpython::{FromPyObject, ObjectProtocol, PyDict, PyObject, PyResult, Python};
 
 use super::node::Node;
+use super::wrapped_float::WrappedFloat;
 
 #[derive(Debug, PartialEq)]
 pub struct NodeEdge {
     pub id: String,
     pub node_a: Node,
     pub node_b: Node,
-    pub weight: f32,
+    pub weight: WrappedFloat,
 }
 
 impl Eq for NodeEdge {}
@@ -19,7 +20,7 @@ impl Hash for NodeEdge {
         self.id.hash(state);
         self.node_a.hash(state);
         self.node_b.hash(state);
-        self.weight.to_bits().hash(state);
+        self.weight.hash(state);
     }
 }
 
@@ -41,7 +42,7 @@ impl<'s> FromPyObject<'s> for NodeEdge {
             id: obj.getattr(py, "id").unwrap().extract(py).unwrap(),
             node_a: obj.getattr(py, "node_a").unwrap().extract(py).unwrap(),
             node_b: obj.getattr(py, "node_b").unwrap().extract(py).unwrap(),
-            weight: obj.getattr(py, "weight").unwrap().extract(py).unwrap(),
+            weight: WrappedFloat::new(obj.getattr(py, "weight").unwrap().extract(py).unwrap()),
         })
     }
 }

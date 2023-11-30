@@ -4,10 +4,10 @@ from node import Node, NodeEdge, distanceBetweenNodes
 from AStar import AStar
 import Map
 
-# import PrintColours
 from time import time
 
 import NodeLookup
+from node import Lat, Lon
 
 # A node can be made up of any type as we simply use its ID as a reference
 # A edge is simply a tuple of 3 things (NodeA, NodeB, Weight) it is bi-directional
@@ -18,10 +18,10 @@ nodeDict = IdDictionary.IdDict[Node](idGen.gen_id())
 edgeDict = IdDictionary.IdDict[NodeEdge](idGen.gen_id())
 
 # Create a simple graph of 4 nodes in the shape of a square A <-> B <-> C <-> D <-> A
-a = Node("A", 0.0, 0.0)
-b = Node("B", 0.0, 0.0)
-c = Node("C", 0.0, 0.0)
-d = Node("D", 0.0, 0.0)
+a = Node("A", Lat(0.0), Lon(0.0))
+b = Node("B", Lat(0.0), Lon(0.0))
+c = Node("C", Lat(0.0), Lon(0.0))
+d = Node("D", Lat(0.0), Lon(0.0))
 
 print("Adding the nodes and getting there IDs")
 print(f"""Adding node A: {nodeDict.add(a)}""")
@@ -79,17 +79,17 @@ timer = time()
     lambda a, b: abs(a.lat - b.lat) + abs(a.lon - b.lon),
 )
 print(f"Completed in {time() - timer:,}s")
-# show_path(tree_map, [p.id for p in path])
+show_path(tree_map, [p.id for p in path])
 print(cost, len(path))
 
 
-def heuristic(a: tuple[float, float], b: tuple[float, float]) -> float:
+def heuristic(a: tuple[Lat, Lon], b: tuple[Lat, Lon]) -> float:
     (a_lat, a_lon) = a
     (b_lat, b_lon) = b
     return abs(a_lat - b_lat) + abs(a_lon - b_lon)
 
 
-def heuristic_b(a: tuple[float, float], b: tuple[float, float]) -> int:
+def heuristic_b(a: tuple[Lat, Lon], b: tuple[Lat, Lon]) -> float:
     (a_lat, a_lon) = a
     (b_lat, b_lon) = b
     Alat: float = math.radians(a_lat)
@@ -104,8 +104,8 @@ def heuristic_b(a: tuple[float, float], b: tuple[float, float]) -> int:
     )
     c: float = 2 * math.asin(math.sqrt(x))
     EarthRadius: float = 6371000
-    result: float = EarthRadius * c
-    return int(result)
+    result = EarthRadius * c
+    return result
 
 
 timer = time()
@@ -117,10 +117,10 @@ timer = time()
 (cost, rust_path) = NodeLookup.get_path(tree_map.edges, start, end, heuristic)
 print(f"Completed in {time() - timer:,}s")
 print(cost, len(rust_path))
-# show_path(tree_map, rust_path)
+show_path(tree_map, rust_path)
 # Distance Calculation
-centralHallNode = Node("Central Hall", 53.94703, -1.05284)
-compSciNode = Node("Dep of Computer Science", 53.94682, -1.03086)
+centralHallNode = Node("Central Hall", Lat(53.94703), Lon(-1.05284))
+compSciNode = Node("Dep of Computer Science", Lat(53.94682), Lon(-1.03086))
 
 
 print(f"Distance between{centralHallNode} and {compSciNode} is {distanceBetweenNodes(centralHallNode,compSciNode)}")
