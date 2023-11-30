@@ -24,7 +24,7 @@ def AStar(
             route.insert(0, current)
         return route
 
-    id = graph.getID
+    id = graph.get_id
 
     explored_nodes: set[Node] = set()
     unexplored_nodes: PriorityQueue[PrioritizedItem] = PriorityQueue()
@@ -43,13 +43,13 @@ def AStar(
         if current_node == GoalNode:
             return (cost_to_node[GoalNode], reconstruct_path(current_node))
         explored_nodes.add(current_node)
-        for node in current_node.getNeighbours():
+        for node in current_node.get_neighbours():
             neighbour: Node = graph.get_node(node).unwrap()
             if neighbour in explored_nodes:
                 continue
             cost: float = (
                 cost_to_node[current_node]
-                + graph.get_edge(id(current_node), id(neighbour)).unwrap().weight
+                + graph.get_edge(id(current_node).unwrap(), id(neighbour).unwrap()).unwrap().weight
             )
 
             if cost < cost_to_node[neighbour]:

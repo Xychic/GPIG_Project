@@ -8,7 +8,7 @@ ConvertibleToFloat: TypeAlias = str | SupportsFloat | SupportsIndex
 
 
 class Lat(float):
-    def __init__(self, val: ConvertibleToFloat):
+    def __init__(self, val: ConvertibleToFloat = 0):
         super().__init__()
 
     def __repr__(self) -> str:
@@ -16,7 +16,7 @@ class Lat(float):
 
 
 class Lon(float):
-    def __init__(self, val: ConvertibleToFloat):
+    def __init__(self, val: ConvertibleToFloat = 0):
         super().__init__()
 
     def __repr__(self) -> str:
@@ -61,13 +61,13 @@ class Node:
     def __repr__(self) -> str:
         return f"Node({self.id}@({self.lat},{self.lon}))"
 
-    def getNeighbours(self) -> set[str]:
+    def get_neighbours(self) -> set[str]:
         return self._neighbour_ids
 
-    def addNeighbours(self, id: str):
+    def add_neighbour(self, id: str):
         self._neighbour_ids.add(id)
 
-    def removeNeighbour(self, id: str):
+    def remove_neighbour(self, id: str):
         self._neighbour_ids.remove(id)
 
     def __hash__(self) -> int:
@@ -148,8 +148,8 @@ class Map:
                 edge_id = self.id_generator()
                 self.edges[edge_id] = NodeEdge(edge_id, a, b, weight)
                 # Update the neighbours of the nodes
-                a.addNeighbours(id_b)
-                b.addNeighbours(id_a)
+                a.add_neighbour(id_b)
+                b.add_neighbour(id_a)
             case _:
                 # Error handling
                 pass
@@ -166,7 +166,7 @@ class Map:
         if node_id in self.nodes.keys():
             match self.get_node(node_id):
                 case Some(node):
-                    return Some(sorted(node.getNeighbours()))
+                    return Some(sorted(node.get_neighbours()))
                 case _:
                     # error handling
 
@@ -180,8 +180,8 @@ class Map:
                 self.remove_edge(e.id)
                 match (self.get_node(id_a), self.get_node(id_b)):
                     case (Some(a), Some(b)):
-                        a.removeNeighbour(id_b)
-                        b.removeNeighbour(id_a)
+                        a.remove_neighbour(id_b)
+                        b.remove_neighbour(id_a)
                     case _:
                         # Error Handling
                         pass
@@ -197,7 +197,7 @@ class Map:
 
     def remove_edge(self, edge_id: str) -> None:
         edge: NodeEdge = self.edges[edge_id]
-        edge.node_a.removeNeighbour(self.getID(edge.node_b))
-        edge.node_b.removeNeighbour(self.getID(edge.node_a))
+        edge.node_a.remove_neighbour(self.getID(edge.node_b))
+        edge.node_b.remove_neighbour(self.getID(edge.node_a))
         del self.edges[edge_id]
         # TODO Silent errors

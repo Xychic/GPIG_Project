@@ -6,12 +6,10 @@ from node import Node, NodeEdge, Lat, Lon
 
 
 class Map:
-    def __init__(self, id_gen: Callable[[], str] = lambda: str(uuid4())) -> None:
+    def __init__(self, id_gen: Callable[[], str] = lambda: str(uuid4())):
         self.id_generator: Callable[[], str] = id_gen
         self.nodes: dict[str, Node] = {}
         self.edges: dict[str, NodeEdge] = {}
-        self.node_keys: set[str] = set()
-        self.edge_keys: set[str] = set()
         self.width = 0
         self.height = 0
 
@@ -22,19 +20,18 @@ class Map:
 
     Edges: {self.edges}"""
 
-    def add_node(self, node: Node) -> None:
-        self.node_keys.add(node.id)
+    def add_node(self, node: Node):
         self.nodes[node.id] = node
 
     def has_node(self, node_id: str) -> bool:
-        return node_id in self.node_keys
+        return node_id in self.nodes.keys()
 
     def get_node(self, node_id: str) -> Option[Node]:
         if node_id in self.nodes.keys():
             return Some(self.nodes[node_id])
         return Null
 
-    def remove_node(self, node_id: str) -> None:
+    def remove_node(self, node_id: str):
         to_remove = [
             edge.id
             for edge in self.edges.values()
@@ -45,8 +42,11 @@ class Map:
         del self.nodes[node_id]
         # TODO Silent errors
 
-    def add_edge(self, id_a: str, id_b: str, weight: float) -> None:
-        if f"{id_a}-{id_b}" in self.edge_keys or f"{id_b}-{id_a}" in self.edge_keys:
+    def add_edge(self, id_a: str, id_b: str, weight: float):
+        if (
+            f"{id_a}-{id_b}" in self.edges.keys()
+            or f"{id_b}-{id_a}" in self.edges.keys()
+        ):
             raise Exception("Edge exists")
         # if self.get_edge(id_a, id_b).is_some():
         #     # TODO Either update edge, do nothing,
@@ -56,9 +56,8 @@ class Map:
                 edge_id = self.id_generator()
                 self.edges[edge_id] = NodeEdge(edge_id, a, b, weight)
                 # Update the neighbours of the nodes
-                a.addNeighbours(id_b)
-                b.addNeighbours(id_a)
-                self.edge_keys.add(f"{id_a}-{id_b}")
+                a.add_neighbour(id_b)
+                b.add_neighbour(id_a)
             case _:
                 # Error handling
                 pass
@@ -72,42 +71,31 @@ class Map:
 
     def get_node_neighbours(self, node_id: str) -> Option[list[str]]:
         """Returns a list of Ids of nodes that are connected to node_id"""
-        if node_id in self.nodes.keys():
-            match self.get_node(node_id):
-                case Some(node):
-                    return Some(sorted(node.getNeighbours()))
-                case _:
-                    # error handling
+        match self.get_node(node_id):
+            case Some(node):
+                return Some(sorted(node.get_neighbours()))
+            case _:
+                # error handling
+                return Null
 
-                    return Null
-        else:
-            return Null
-
-    def remove_edge_by_nodes(self, id_a: str, id_b: str) -> None:
+    def remove_edge_by_nodes(self, id_a: str, id_b: str):
         match self.get_edge(id_a, id_b):
             case Some(e):
                 self.remove_edge(e.id)
-                match (self.get_node(id_a), self.get_node(id_b)):
-                    case (Some(a), Some(b)):
-                        a.removeNeighbour(id_b)
-                        b.removeNeighbour(id_a)
-                    case _:
-                        # Error Handling
-                        pass
             case _:
                 # Error Handling
                 pass
 
-    def getID(self, node: Node) -> str:
-        for k in self.nodes:
-            if self.nodes[k] == node:
-                return k
-        raise LookupError
+    def get_id(self, node: Node) -> Option[str]:
+        for id, n in self.nodes.items():
+            if n == node:
+                return Some(id)
+        return Null
 
-    def remove_edge(self, edge_id: str) -> None:
+    def remove_edge(self, edge_id: str):
         edge: NodeEdge = self.edges[edge_id]
-        edge.node_a.removeNeighbour(self.getID(edge.node_b))
-        edge.node_b.removeNeighbour(self.getID(edge.node_a))
+        edge.node_a.remove_neighbour(self.get_id(edge.node_b).unwrap())
+        edge.node_b.remove_neighbour(self.get_id(edge.node_a).unwrap())
         del self.edges[edge_id]
         # TODO Silent errors
 
