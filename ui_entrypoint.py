@@ -1,5 +1,5 @@
 # imports
-from dashboard import Dashboard
+from web_ui.dashboard import Dashboard
 
 
 dashboard = Dashboard()
