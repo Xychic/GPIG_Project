@@ -14,7 +14,12 @@ class Dashboard:
         load_dotenv("ui.env")
 
         self.ui = pn.template.FastGridTemplate(
-            title="Placeholder",
+            title="LORACHS Dashboard",
+            corner_radius=5,
+            header_background="#9db8c9",
+            logo="images/icon.png",
+            favicon="images/icon.png"
+
         )
 
         self.map_object = None
@@ -26,4 +31,6 @@ class Dashboard:
         self.ui.main[:2, :6] = self.map_object
 
         return self.ui
+
+
 
