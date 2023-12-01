@@ -30,7 +30,7 @@ class PyDeckMap(pn.viewable.Viewer):
             api_keys={
                 "mapbox": os.getenv("MAPBOX_API_KEY")
             },
-            layers=[],
+            layers=[self.heatmap_layer()],
             initial_view_state=pdk.ViewState(
                 latitude=lat,
                 longitude=lon,
