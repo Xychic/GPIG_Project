@@ -1,33 +1,59 @@
 # imports
 import os
 
+import pandas as pd
+import param
 import pydeck as pdk
 import panel as pn
+from param import depends
 
 
-class PyDeckMap:
+class PyDeckMap(pn.viewable.Viewer):
 
-    def __init__(self):
+    map_data = param.DataFrame(default=pd.DataFrame())
 
-        INITIAL_VIEW_STATE = pdk.ViewState(
-            latitude=53.946813,
-            longitude=-1.030806,
-            zoom=11,
-            max_zoom=16,
-            pitch=45,
-            bearing=0
-        )
+    def __init__(self, **params):
 
-        self.deck = pdk.Deck(
+        super().__init__(**params)
+
+    @depends("map_data", watch=True)
+    def deck(self):
+
+        if self.map_data.empty:
+            lat = 53.946813
+            lon = -1.030806
+        else:
+            lat = self.map_data["lat"].mean()
+            lon = self.map_data["lon"].mean()
+
+        return pdk.Deck(
             api_keys={
                 "mapbox": os.getenv("MAPBOX_API_KEY")
             },
             layers=[],
-            initial_view_state=INITIAL_VIEW_STATE,
+            initial_view_state=pdk.ViewState(
+                latitude=lat,
+                longitude=lon,
+                zoom=11,
+                max_zoom=16,
+                pitch=45,
+                bearing=0
+            ),
             map_provider="mapbox",
-            map_style=pdk.map_styles.MAPBOX_SATELLITE,
+            map_style=pdk.map_styles.MAPBOX_DARK,
+        )
+
+    @depends("map_data", watch=True)
+    def heatmap_layer(self):
+        return pdk.Layer(
+            "HeatmapLayer",
+            data=self.map_data,
+            opacity=0.9,
+            get_position=["lon", "lat"],
+            threshold=0.1,
+            get_weight="temperature",
+            pickable=True
         )
 
     def __panel__(self):
-
         return pn.pane.DeckGL(self.deck, sizing_mode="stretch_both")

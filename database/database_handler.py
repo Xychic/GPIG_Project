@@ -3,6 +3,7 @@ import configparser
 
 # pip imports
 import psycopg2
+import pandas as pd
 
 # local imports
 from objects.site import Site
@@ -44,6 +45,20 @@ class DatabaseHandler:
 
                     # query returns no results, not really an error I just don't know if there's a better way to check
                     pass
+
+    def execute_expression_to_pandas(self, sql_expression: str, sql_parameters: tuple):
+
+        with psycopg2.connect(dbname=self.conf["DATABASE_CONNECTION_INFO"]["DB_NAME"],
+                              user=self.conf["DATABASE_CONNECTION_INFO"]["DB_USER"],
+                              password=self.conf["DATABASE_CONNECTION_INFO"]["DB_PASS"],
+                              host=self.conf["DATABASE_CONNECTION_INFO"]["DB_HOST"],
+                              port=self.conf["DATABASE_CONNECTION_INFO"]["DB_PORT"]) as conn:
+
+            # TODO exception catching
+
+            output = pd.read_sql_query(sql=sql_expression, params=list(sql_parameters), con=conn)
+
+            return output
 
     # INSERTION FUNCTIONS
 
@@ -246,6 +261,24 @@ class DatabaseHandler:
         # TODO unsure of desired format
 
         pass
+
+    def pandas_sensordata_test(self, site_id: int) -> pd.DataFrame:
+
+        sql_expression = '''
+            select ntdl.node_id, n.lat, n.lon, sd.*
+            from sensor_data sd
+            left join node_to_data_links ntdl ON ntdl.data_id = sd.id
+            left join nodes n ON n.id = ntdl.node_id
+            where n.site_id = %s;
+        '''
+
+        sql_parameters = (site_id, )
+
+        output_df = self.execute_expression_to_pandas(sql_expression=sql_expression, sql_parameters=sql_parameters)
+
+        return output_df
+
+
 
 
 if __name__ == "__main__":
