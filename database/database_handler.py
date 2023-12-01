@@ -279,8 +279,6 @@ class DatabaseHandler:
         return output_df
 
 
-
-
 if __name__ == "__main__":
     test_db_handler = DatabaseHandler("database/db.ini")
 

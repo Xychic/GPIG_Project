@@ -20,6 +20,7 @@ class Dashboard:
 
         self.ui = None
         self.site_select = None
+        self.data_type_select = None
         self.map_object = None
         self.sidebar = None
 
@@ -28,6 +29,13 @@ class Dashboard:
         # define UI objects -------------------------------------------------------------------------------------------
 
         self.site_select = pn.widgets.Select(name="Site", options=self.database_handler.get_all_sites())
+        self.data_type_select = pn.widgets.Select(name="Data Type",
+                                                  value="temperature",
+                                                  options=["co2_level", "ozone_level", "temperature",
+                                                           "humidity", "co_level", "so2_level",
+                                                           "no2_level", "soil_moisture_level",
+                                                           "soil_temperature", "soil_humidity",
+                                                           "soil_ph"],)
 
         self.map_object = PyDeckMap()
 
@@ -39,7 +47,7 @@ class Dashboard:
             header_background="#9db8c9",
             logo="web_ui/images/icon.png",
             favicon="web_ui/images/icon.png",
-            sidebar=pn.Column(self.site_select)
+            sidebar=pn.Column(self.site_select, self.data_type_select)
         )
 
         # define UI structure -----------------------------------------------------------------------------------------
@@ -49,6 +57,7 @@ class Dashboard:
         # define UI events --------------------------------------------------------------------------------------------
 
         self.site_select.param.watch(self.site_changed_event, "value")
+        self.data_type_select.param.watch(self.data_type_changed_event, "value")
 
         return self.ui
 
@@ -64,5 +73,8 @@ class Dashboard:
 
         self.update_ui_event()
 
+    def data_type_changed_event(self, event: param.Event):
+
+        self.map_object.heatmap_weight = event.obj.value
 
 

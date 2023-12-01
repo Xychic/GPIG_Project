@@ -12,11 +12,13 @@ class PyDeckMap(pn.viewable.Viewer):
 
     map_data = param.DataFrame(default=pd.DataFrame())
 
+    heatmap_weight = param.String(default="temperature")
+
     def __init__(self, **params):
 
         super().__init__(**params)
 
-    @depends("map_data", watch=True)
+    @depends("map_data", "heatmap_weight", watch=True)
     def deck(self):
 
         if self.map_data.empty:
@@ -43,7 +45,7 @@ class PyDeckMap(pn.viewable.Viewer):
             map_style=pdk.map_styles.MAPBOX_DARK,
         )
 
-    @depends("map_data", watch=True)
+    @depends("map_data", "heatmap_weight", watch=True)
     def heatmap_layer(self):
         return pdk.Layer(
             "HeatmapLayer",
@@ -51,7 +53,7 @@ class PyDeckMap(pn.viewable.Viewer):
             opacity=0.9,
             get_position=["lon", "lat"],
             threshold=0.1,
-            get_weight="temperature",
+            get_weight=self.heatmap_weight,
             pickable=True
         )
 
