@@ -1,6 +1,9 @@
 from dataclasses import dataclass, field
 from node import Node, distanceBetweenNodes
+
 from Map import Map
+from objects.node import Node, distanceBetweenNodes
+
 from typing import Callable
 from queue import PriorityQueue
 
@@ -64,11 +67,15 @@ def AStar(
 
                 # If neighbour already exists update the priority if we have a shorter path to neighbour
                 if any(entry.item == neighbour for entry in unexplored_nodes.queue):
-                    entry: PrioritizedItem = next(obj for obj in unexplored_nodes.queue if obj.item == neighbour)
+                    entry: PrioritizedItem = next(
+                        obj for obj in unexplored_nodes.queue if obj.item == neighbour
+                    )
                     if entry.priority < estimated_cost_to_goal_via_node:
                         entry.priority = estimated_cost_to_goal_via_node
                 # If neighbour not in the priority queue add it
                 else:
-                    unexplored_nodes.put(PrioritizedItem(estimated_cost_to_goal_via_node, neighbour))
+                    unexplored_nodes.put(
+                        PrioritizedItem(estimated_cost_to_goal_via_node, neighbour)
+                    )
 
     raise LookupError("No valid path")

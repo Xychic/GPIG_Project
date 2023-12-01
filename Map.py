@@ -2,7 +2,7 @@ from typing import Callable
 from uuid import uuid4
 from Option import Null, Option, Some
 
-from node import Node, NodeEdge, Lat, Lon
+from objects.node import Node, NodeEdge, Lat, Lon
 
 
 class Map:
