@@ -119,6 +119,8 @@ CREATE TABLE public.data_limits (
 	soil_moisture_level_max numeric NULL,
 	soil_temperature_min numeric NULL,
 	soil_temperature_max numeric NULL,
+	soil_humidity_min numeric NULL,
+	soil_humidity_max numeric NULL,
 	soil_ph_min numeric NULL,
 	soil_ph_max numeric NULL,
 	site_id int8 NOT NULL,
