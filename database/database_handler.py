@@ -278,6 +278,18 @@ class DatabaseHandler:
 
         return output_df
 
+    def get_site_data_limits(self, site_id: int) -> pd.DataFrame:
+
+        sql_expression = '''
+            select * from data_limits where site_id = %s
+        '''
+
+        sql_parameters = (site_id, )
+
+        output_df = self.execute_expression_to_pandas(sql_expression=sql_expression, sql_parameters=sql_parameters)
+
+        return output_df
+
 
 if __name__ == "__main__":
     test_db_handler = DatabaseHandler("database/db.ini")

@@ -7,7 +7,10 @@ import param
 from dotenv import load_dotenv
 
 from web_ui.pydeck_map import PyDeckMap
+from web_ui.plotly_handler import PlotlyHandler
 from database.database_handler import DatabaseHandler
+
+pn.extension("plotly")
 
 
 class Dashboard:
@@ -17,11 +20,13 @@ class Dashboard:
         load_dotenv("web_ui/ui.env")
 
         self.database_handler = DatabaseHandler("database/db.ini")
+        self.plotly_handler = PlotlyHandler()
 
         self.ui = None
         self.site_select = None
         self.data_type_select = None
         self.map_object = None
+        self.sensordata_over_time = None
         self.sidebar = None
 
     def start_ui(self):
@@ -39,6 +44,8 @@ class Dashboard:
 
         self.map_object = PyDeckMap()
 
+        self.sensordata_over_time = pn.pane.Plotly()
+
         # initialise UI template --------------------------------------------------------------------------------------
 
         self.ui = pn.template.FastGridTemplate(
@@ -53,6 +60,7 @@ class Dashboard:
         # define UI structure -----------------------------------------------------------------------------------------
 
         self.ui.main[:2, :6] = self.map_object
+        self.ui.main[2:4, :6] = self.sensordata_over_time
 
         # define UI events --------------------------------------------------------------------------------------------
 
@@ -63,9 +71,18 @@ class Dashboard:
 
     def update_ui_event(self):
 
-        df = self.database_handler.pandas_sensordata_test(site_id=self.site_select.value.site_id)
+        new_site_id = self.site_select.value.site_id
 
+        df = self.database_handler.pandas_sensordata_test(site_id=new_site_id)
+        limits = self.database_handler.get_site_data_limits(site_id=new_site_id)
+
+        # update map
         self.map_object.map_data = df
+
+        # update plotly graphs
+        new_sensordata_over_time = self.plotly_handler.gen_sensordata_line_chart(sensordata_df=df,
+                                                                                 data_limits_df=limits)
+        self.sensordata_over_time.object = new_sensordata_over_time
 
     def site_changed_event(self, event: param.Event):
 
