@@ -19,6 +19,9 @@ class Dashboard:
 
         load_dotenv("web_ui/ui.env")
 
+        self.df = None
+        self.limits = None
+
         self.database_handler = DatabaseHandler("database/db.ini")
         self.plotly_handler = PlotlyHandler()
 
@@ -44,7 +47,7 @@ class Dashboard:
 
         self.map_object = PyDeckMap()
 
-        self.sensordata_over_time = pn.pane.Plotly()
+        self.sensordata_over_time = pn.pane.Plotly(sizing_mode="stretch_width")
 
         # initialise UI template --------------------------------------------------------------------------------------
 
@@ -73,15 +76,19 @@ class Dashboard:
 
         new_site_id = self.site_select.value.site_id
 
-        df = self.database_handler.pandas_sensordata_test(site_id=new_site_id)
-        limits = self.database_handler.get_site_data_limits(site_id=new_site_id)
+        self.df = self.database_handler.pandas_sensordata_test(site_id=new_site_id)
+        self.limits = self.database_handler.get_site_data_limits(site_id=new_site_id)
 
         # update map
-        self.map_object.map_data = df
+        self.map_object.map_data = self.df
 
-        # update plotly graphs
-        new_sensordata_over_time = self.plotly_handler.gen_sensordata_line_chart(sensordata_df=df,
-                                                                                 data_limits_df=limits)
+        self.update_plotly_graphs()
+
+    def update_plotly_graphs(self):
+        new_sensordata_over_time = self.plotly_handler.gen_sensordata_line_chart(sensordata_df=self.df,
+                                                                                 data_limits_df=self.limits,
+                                                                                 column_name=self.data_type_select.value
+                                                                                 )
         self.sensordata_over_time.object = new_sensordata_over_time
 
     def site_changed_event(self, event: param.Event):
@@ -93,5 +100,7 @@ class Dashboard:
     def data_type_changed_event(self, event: param.Event):
 
         self.map_object.heatmap_weight = event.obj.value
+
+        self.update_plotly_graphs()
 
 
