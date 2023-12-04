@@ -99,6 +99,35 @@ CREATE TABLE public.species (
 );
 
 
+CREATE TABLE public.data_limits (
+	id bigserial NOT NULL,
+	co2_level_min numeric NULL,
+	co2_level_max numeric NULL,
+	ozone_level_min numeric NULL,
+	ozone_level_max numeric NULL,
+	temperature_min numeric NULL,
+	temperature_max numeric NULL,
+	humidity_min numeric NULL,
+	humidity_max numeric NULL,
+	co_level_min numeric NULL,
+	co_level_max numeric NULL,
+	so2_level_min numeric NULL,
+	so2_level_max numeric NULL,
+	no2_level_min numeric NULL,
+	no2_level_max numeric NULL,
+	soil_moisture_level_min numeric NULL,
+	soil_moisture_level_max numeric NULL,
+	soil_temperature_min numeric NULL,
+	soil_temperature_max numeric NULL,
+	soil_ph_min numeric NULL,
+	soil_ph_max numeric NULL,
+	site_id int8 NOT NULL,
+	CONSTRAINT data_limits_pk PRIMARY KEY (id),
+	CONSTRAINT data_limits_fk FOREIGN KEY (site_id) REFERENCES public.sites(id)
+);
+
+
+
 --
 -- TOC entry 3426 (class 0 OID 16459)
 -- Dependencies: 220
