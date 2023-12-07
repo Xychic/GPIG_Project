@@ -4,11 +4,15 @@ use std::{
     process::Command,
 };
 
+use ci::*;
+
+mod ci;
+
 type DynError = Box<dyn std::error::Error>;
 
 fn main() {
     if let Err(e) = try_main() {
-        eprintln!("{}", e);
+        eprintln!("\n\nSome errors occured in the xtask:\n\n{}", e);
         std::process::exit(1)
     }
 }
@@ -48,11 +52,6 @@ fn ci() -> Result<(), DynError> {
         .args(["clippy", "-p", "node_lookup", "--", "-Dwarnings"])
         .status()?;
 
-    let poetry_res = Command::new("poetry")
-        .current_dir(project_root())
-        .args(["install"])
-        .status()?;
-
     let mut err = "".to_owned();
 
     if !build_res.success() {
@@ -60,13 +59,15 @@ fn ci() -> Result<(), DynError> {
     }
 
     if !clippy_res.success() {
+        eprintln!("Clippy run failed");
         err.push_str("Clippy run failed.\n");
     }
-    if !poetry_res.success() {
-        err.push_str("Poetry error.\n");
+
+    if let Err(formatting_error) = check_formatting() {
+        err.push_str(formatting_error.to_string().as_str());
     }
 
-    if err.len() > 0 {
+    if !err.is_empty() {
         return Err(err)?;
     }
     Ok(())
