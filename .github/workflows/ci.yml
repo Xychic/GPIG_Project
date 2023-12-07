@@ -24,6 +24,6 @@ jobs:
           poetry env use '3.10'
           poetry install
 
-      - name: Run pytest
+      - name: Run CI tests
         run: |
-          echo No tests yet
+          cargo xtask ci
