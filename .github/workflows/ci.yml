@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push: 
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry
+
+      - uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+          architecture: 'x64'
+
+      - name: Run poetry install
+        run: |
+          poetry env use '3.10'
+          poetry install
+
+      - name: Run CI tests
+        run: |
+          cargo xtask ci

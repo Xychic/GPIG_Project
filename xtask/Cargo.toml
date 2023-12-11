@@ -1,0 +1,7 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+authors = ["Adam Blanchet <adamblanchet@free.fr>"]
+edition = "2021"
+
+[dependencies]

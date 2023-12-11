@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from node import Node, distanceBetweenNodes
 
 from Map import Map
 from objects.node import Node, distanceBetweenNodes

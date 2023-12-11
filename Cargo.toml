@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+  "xtask",
+  "node_lookup"
+]
