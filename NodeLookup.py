@@ -1,5 +1,5 @@
 from typing import Callable
-from node import NodeEdge, Lat, Lon
+from objects.node import NodeEdge, Lat, Lon
 import node_lookup
 
 
