@@ -1,1 +1,1 @@
-./node_lookup/target/release/libnode_lookup.so
+target/release/libnode_lookup.so
